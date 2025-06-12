@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState } from 'react'
 
-import { ContentManifest } from '../lib/types'
+import { ContentManifest, Post } from '../lib/types'
 import ImageDialog from './image-dialog'
 
 export interface ImageGridProps {
@@ -11,19 +11,7 @@ export interface ImageGridProps {
 }
 
 export default function ImageGrid({ manifest }: ImageGridProps) {
-  const [selectedImage, setSelectedImage] = useState<{
-    src: string
-    alt: string
-  } | null>(null)
-
-  const handleImageClick = (src: string, alt: string) => {
-    setSelectedImage({ src, alt })
-  }
-
-  const handleCloseDialog = () => {
-    setSelectedImage(null)
-  }
-
+  const [selectedImage, setSelectedImage] = useState<Post | null>(null)
   const postsWithImages = manifest.posts.filter(
     (post) => post.images.length > 0
   )
@@ -43,12 +31,7 @@ export default function ImageGrid({ manifest }: ImageGridProps) {
                 height={410}
                 className="cursor-pointer object-cover transition-all duration-200 hover:brightness-80"
                 style={{ width: '300px', height: '410px' }}
-                onClick={() =>
-                  handleImageClick(
-                    post.images[0].cdnUrl,
-                    /*post.firstImage.alt ||*/ ''
-                  )
-                }
+                onClick={() => setSelectedImage(post)}
               />
               {post.images.length > 1 && (
                 <div className="absolute top-2 right-2 h-6 w-6">
@@ -68,10 +51,9 @@ export default function ImageGrid({ manifest }: ImageGridProps) {
 
       {selectedImage && (
         <ImageDialog
-          src={selectedImage.src}
-          alt={selectedImage.alt}
+          post={selectedImage}
           isOpen={!!selectedImage}
-          onClose={handleCloseDialog}
+          onClose={() => setSelectedImage(null)}
         />
       )}
     </>
