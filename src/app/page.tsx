@@ -7,15 +7,15 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">BlueSky Posts</h1>
+      <header className="border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-4xl px-4 py-4">
+          <h1 className="font-bold text-2xl text-gray-900">BlueSky Posts</h1>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-700">
+          <h2 className="font-semibold text-gray-700 text-lg">
             Latest 20 Posts
           </h2>
         </div>

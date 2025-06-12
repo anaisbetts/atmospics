@@ -51,7 +51,7 @@ export default function ImageDialog({
     <dialog
       ref={dialogRef}
       onClick={handleBackdropClick}
-      className="bg-transparent p-0 max-w-none max-h-none w-screen h-screen"
+      className="h-screen max-h-none w-screen max-w-none bg-transparent p-0"
       style={{
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
       }}
@@ -66,7 +66,7 @@ export default function ImageDialog({
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-75"
+          className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75"
         >
           ×
         </button>

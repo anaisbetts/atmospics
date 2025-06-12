@@ -31,7 +31,7 @@ export default function ImageGrid({ manifest }: ImageGridProps) {
   return (
     <>
       {postsWithImages.length === 0 ? (
-        <div className="text-center text-gray-500 py-8">No images found</div>
+        <div className="py-8 text-center text-gray-500">No images found</div>
       ) : (
         <div className="grid grid-cols-3 gap-1" style={{ gap: '4px' }}>
           {postsWithImages.map((post, index) => (
@@ -41,7 +41,7 @@ export default function ImageGrid({ manifest }: ImageGridProps) {
                 alt={/*post.firstImage.alt ||*/ ''}
                 width={300}
                 height={410}
-                className="object-cover hover:brightness-80 transition-all duration-200 cursor-pointer"
+                className="cursor-pointer object-cover transition-all duration-200 hover:brightness-80"
                 style={{ width: '300px', height: '410px' }}
                 onClick={() =>
                   handleImageClick(
@@ -51,7 +51,7 @@ export default function ImageGrid({ manifest }: ImageGridProps) {
                 }
               />
               {post.images.length > 1 && (
-                <div className="absolute top-2 right-2 w-6 h-6">
+                <div className="absolute top-2 right-2 h-6 w-6">
                   <Image
                     src="/carousel.svg"
                     alt="Carousel icon"
