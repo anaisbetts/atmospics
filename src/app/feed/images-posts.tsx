@@ -22,25 +22,24 @@ async function fetchContentManifest(): Promise<ContentManifest> {
 export default async function ImagesPosts() {
   const manifest = await fetchContentManifest()
 
-  const allImages = manifest.posts.flatMap((post) =>
-    post.images.map((image) => ({
-      ...image,
-      postText: post.text,
-      postDate: post.createdAt,
+  const postsWithImages = manifest.posts
+    .filter((post) => post.images.length > 0)
+    .map((post) => ({
+      ...post,
+      firstImage: post.images[0],
     }))
-  )
 
   return (
     <>
-      {allImages.length === 0 ? (
+      {postsWithImages.length === 0 ? (
         <div className="text-center text-gray-500 py-8">No images found</div>
       ) : (
         <div className="grid grid-cols-3 gap-1" style={{ gap: '4px' }}>
-          {allImages.map((image, index) => (
-            <div key={index} className="relative">
+          {postsWithImages.map((post, index) => (
+            <div key={post.id || index} className="relative">
               <Image
-                src={image.cdnUrl}
-                alt={/*image.alt ||*/ ''}
+                src={post.firstImage.cdnUrl}
+                alt={/*post.firstImage.alt ||*/ ''}
                 width={300}
                 height={410}
                 className="object-cover"
