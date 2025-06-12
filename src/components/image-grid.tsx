@@ -41,7 +41,7 @@ export default function ImageGrid({ manifest }: ImageGridProps) {
                 alt={/*post.firstImage.alt ||*/ ''}
                 width={300}
                 height={410}
-                className="object-cover hover:opacity-90 transition-opacity"
+                className="object-cover hover:brightness-80 transition-all duration-200 cursor-pointer"
                 style={{ width: '300px', height: '410px' }}
                 onClick={() =>
                   handleImageClick(
@@ -50,6 +50,17 @@ export default function ImageGrid({ manifest }: ImageGridProps) {
                   )
                 }
               />
+              {post.images.length > 1 && (
+                <div className="absolute top-2 right-2 w-6 h-6">
+                  <Image
+                    src="/carousel.svg"
+                    alt="Carousel icon"
+                    width={24}
+                    height={24}
+                    className="drop-shadow-md"
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
