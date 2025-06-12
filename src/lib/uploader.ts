@@ -7,6 +7,7 @@ import { ContentManifest, Post, generateHashForManifest } from './types'
 
 export async function loadFullContentManifest(): Promise<ContentManifest> {
   let manifest: ContentManifest | undefined
+  let shouldSave = false
 
   try {
     manifest = await fetchContentManifest()
@@ -33,7 +34,11 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
         }
       }
 
-      mergeManifests(manifest, archiveManifest)
+      if (archiveManifest.posts.length > manifest.posts.length) {
+        shouldSave = true
+      }
+
+      manifest = mergeManifests(manifest, archiveManifest)
       console.log(
         `Merged archive manifest, now have ${manifest.posts.length} total posts`
       )
@@ -57,12 +62,16 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
   }
 
   if (newPosts.posts.length > 0) {
-    mergeManifests(manifest, newPosts)
+    shouldSave = true
+    manifest = mergeManifests(manifest, newPosts)
   }
 
   manifest = await rehostContent(manifest)
 
-  await saveContentManifest(manifest)
+  if (shouldSave) {
+    await saveContentManifest(manifest)
+  }
+
   return manifest
 }
 
@@ -88,6 +97,7 @@ export async function rehostContent(
         const extension = getFileExtensionFromMimeType(contentType)
         const filename = `${crypto.randomUUID()}${extension ? '.' + extension : ''}`
 
+        console.log(`Rehosting image ${image.cdnUrl} to ${filename}`)
         const { url } = await put(filename, blob, {
           access: 'public',
         })
@@ -169,7 +179,10 @@ export async function saveContentManifest(
   console.log(`Saved content manifest to ${url}`)
 }
 
-function mergeManifests(manifest: ContentManifest, newPosts: ContentManifest) {
+function mergeManifests(
+  manifest: ContentManifest,
+  newPosts: ContentManifest
+): ContentManifest {
   const allPosts = [...manifest.posts, ...newPosts.posts]
 
   const uniquePosts = allPosts.reduce((acc, post) => {
@@ -185,8 +198,13 @@ function mergeManifests(manifest: ContentManifest, newPosts: ContentManifest) {
     return dateB.toMillis() - dateA.toMillis()
   })
 
-  manifest.posts = uniquePosts
-  manifest.hash = generateHashForManifest(manifest)
+  const mergedManifest = {
+    ...manifest,
+    posts: uniquePosts,
+  }
+
+  mergedManifest.hash = generateHashForManifest(mergedManifest)
+  return mergedManifest
 }
 
 function getFileExtensionFromMimeType(contentType: string): string {

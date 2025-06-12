@@ -78,13 +78,10 @@ export class BlueskyFeedBuilder implements FeedBuilder {
         // Extract images from embed
         if (record.embed?.images) {
           for (const img of record.embed.images) {
-            console.log('Processing image:', JSON.stringify(img))
-
             if (img.image?.ref) {
               const cid: CID = img.image.ref
 
               const cdn = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${targetDid}&cid=${cid.toString()}`
-              console.log('CDN URL:', cdn)
               images.push({
                 type: 'image',
                 cdnUrl: cdn,
