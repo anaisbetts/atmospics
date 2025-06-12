@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import DrilPosts from './dril-posts';
+import ImagesPosts from './images-posts';
 
 export default function Feed() {
   return (
@@ -24,7 +24,7 @@ export default function Feed() {
             Loading posts...
           </div>
         }>
-          <DrilPosts />
+          <ImagesPosts />
         </Suspense>
       </main>
     </div>

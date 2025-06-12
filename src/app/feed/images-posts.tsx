@@ -74,13 +74,13 @@ const getCachedPosts = unstable_cache(
   }
 );
 
-async function fetchDrilPosts(): Promise<Post[]> {
+async function fetchImagesPosts(): Promise<Post[]> {
   const bskyTarget = process.env.BSKY_TARGET || "dril.bsky.social";
   return await getCachedPosts(bskyTarget);
 }
 
-export default async function DrilPosts() {
-  const posts = await fetchDrilPosts();
+export default async function ImagesPosts() {
+  const posts = await fetchImagesPosts();
 
   return (
     <>
