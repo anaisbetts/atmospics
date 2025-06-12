@@ -9,10 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@anaisbetts/commands": "^0.3.2",
     "@atproto/api": "^0.15.14",
     "next": "15.3.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
