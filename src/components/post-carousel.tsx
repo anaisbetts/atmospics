@@ -1,0 +1,119 @@
+'use client'
+
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Image from 'next/image'
+import * as React from 'react'
+import { useEffect, useState } from 'react'
+
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from '@/components/ui/carousel'
+import { ImageContent } from '@/lib/types'
+import { cn } from '@/lib/utils'
+
+interface PostCarouselProps {
+  images: ImageContent[]
+  className?: string
+}
+
+export function PostCarousel({ images, className }: PostCarouselProps) {
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+  const [count, setCount] = useState(0)
+
+  console.log('PostCarousel images count:', images.length)
+
+  useEffect(() => {
+    if (!api) return
+
+    setCount(api.scrollSnapList().length)
+    setCurrent(api.selectedScrollSnap() + 1)
+
+    api.on('select', () => {
+      setCurrent(api.selectedScrollSnap() + 1)
+    })
+  }, [api])
+
+  if (images.length === 0) return null
+
+  return (
+    <div className={cn('relative group bg-red-300', className)}>
+      <Carousel
+        setApi={setApi}
+        className="w-full"
+        opts={{
+          align: 'start',
+          loop: false,
+        }}
+      >
+        <CarouselContent>
+          {images.map((image, index) => (
+            <CarouselItem key={index}>
+              <div className="relative w-full h-full flex items-center justify-center bg-green-400">
+                {image.type === 'image' ? (
+                  <Image
+                    src={image.cdnUrl}
+                    alt={`Post image ${index + 1}`}
+                    fill
+                    className="object-contain"
+                  />
+                ) : (
+                  <video
+                    src={image.cdnUrl}
+                    className="w-full h-full object-contain"
+                    controls
+                    preload="metadata"
+                  />
+                )}
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+
+        {/* Navigation Arrows - Only show if more than 1 image */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={() => api?.scrollPrev()}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+              disabled={current === 1}
+            >
+              <ChevronLeft className="w-5 h-5" />
+              <span className="sr-only">Previous image</span>
+            </button>
+            <button
+              onClick={() => api?.scrollNext()}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+              disabled={current === count}
+            >
+              <ChevronRight className="w-5 h-5" />
+              <span className="sr-only">Next image</span>
+            </button>
+          </>
+        )}
+      </Carousel>
+
+      {/* Dots Indicator - Only show if more than 1 image */}
+      {images.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+          {Array.from({ length: count }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => api?.scrollTo(index)}
+              className={cn(
+                'w-2 h-2 rounded-full transition-all duration-200',
+                index + 1 === current
+                  ? 'bg-white'
+                  : 'bg-white/50 hover:bg-white/70'
+              )}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

@@ -1,9 +1,9 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect, useRef } from 'react'
 
 import { Post } from '@/lib/types'
+import { PostCarousel } from './post-carousel'
 
 interface ImageDialogProps {
   post: Post
@@ -16,8 +16,6 @@ export default function ImageDialog({
   isOpen,
   onClose,
 }: ImageDialogProps) {
-  const src = post.images[0].cdnUrl
-  const alt = ''
 
   const dialogRef = useRef<HTMLDialogElement>(null)
 
@@ -73,18 +71,9 @@ export default function ImageDialog({
         >
           ×
         </button>
-        <Image
-          src={src}
-          alt={alt}
-          width={0}
-          height={0}
-          sizes="100vw"
-          className="object-contain"
-          style={{
-            width: 'auto',
-            height: '100%',
-            maxWidth: '100%',
-          }}
+        <PostCarousel 
+          images={post.images} 
+          className="w-full h-full max-h-full"
         />
       </div>
     </dialog>
