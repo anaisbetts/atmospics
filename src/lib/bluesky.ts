@@ -78,16 +78,16 @@ export class BlueskyFeedBuilder implements FeedBuilder {
         // Extract images from embed
         if (record.embed?.images) {
           for (const img of record.embed.images) {
-            console.log('Processing image:', JSON.stringify(img))
-
             if (img.image?.ref) {
               const cid: CID = img.image.ref
 
               const cdn = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${targetDid}&cid=${cid.toString()}`
-              console.log('CDN URL:', cdn)
               images.push({
                 type: 'image',
                 cdnUrl: cdn,
+                altText: img.alt || '',
+                width: img.aspectRatio?.width || 0,
+                height: img.aspectRatio?.height || 0,
               })
             } else {
               console.warn('Image ref is not a link!', img.image)
@@ -96,7 +96,7 @@ export class BlueskyFeedBuilder implements FeedBuilder {
         }
 
         return {
-          id: item.post.uri,
+          id: item.post.cid.toString(),
           images,
           text: record.text || 'No text content',
           createdAt: record.createdAt || item.post.indexedAt,
@@ -112,7 +112,10 @@ export class BlueskyFeedBuilder implements FeedBuilder {
           break
         }
 
-        allPosts.push(post)
+        // Only add posts that are newer than or equal to 'since'
+        if (!since || postDate >= since) {
+          allPosts.push(post)
+        }
       }
 
       // Check if there are more posts to fetch

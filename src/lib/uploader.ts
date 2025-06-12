@@ -7,6 +7,7 @@ import { ContentManifest, Post, generateHashForManifest } from './types'
 
 export async function loadFullContentManifest(): Promise<ContentManifest> {
   let manifest: ContentManifest | undefined
+  let shouldSave = false
 
   try {
     manifest = await fetchContentManifest()
@@ -17,10 +18,39 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
     )
   }
 
+  // Try to fetch and merge archive manifest
+  try {
+    const archiveManifest = await fetchArchiveManifest()
+    if (archiveManifest) {
+      console.log(
+        `Found archive manifest with ${archiveManifest.posts.length} posts`
+      )
+
+      if (!manifest) {
+        manifest = {
+          createdAt: archiveManifest.createdAt,
+          hash: '',
+          posts: [],
+        }
+      }
+
+      if (archiveManifest.posts.length > manifest.posts.length) {
+        shouldSave = true
+      }
+
+      manifest = mergeManifests(manifest, archiveManifest)
+      console.log(
+        `Merged archive manifest, now have ${manifest.posts.length} total posts`
+      )
+    }
+  } catch (error) {
+    console.error('Failed to fetch or merge archive manifest:', error)
+  }
+
   // Update content
   const feedBuilder = new BlueskyFeedBuilder(process.env.BSKY_TARGET!)
   const newPosts = await feedBuilder.extractPosts(
-    manifest ? DateTime.fromISO(manifest.createdAt) : undefined
+    manifest ? DateTime.fromISO(manifest.posts[0].createdAt) : undefined
   )
 
   if (!manifest) {
@@ -32,12 +62,16 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
   }
 
   if (newPosts.posts.length > 0) {
-    mergeManifests(manifest, newPosts)
+    shouldSave = true
+    manifest = mergeManifests(manifest, newPosts)
   }
 
   manifest = await rehostContent(manifest)
 
-  await saveContentManifest(manifest)
+  if (shouldSave) {
+    await saveContentManifest(manifest)
+  }
+
   return manifest
 }
 
@@ -63,6 +97,7 @@ export async function rehostContent(
         const extension = getFileExtensionFromMimeType(contentType)
         const filename = `${crypto.randomUUID()}${extension ? '.' + extension : ''}`
 
+        console.log(`Rehosting image ${image.cdnUrl} to ${filename}`)
         const { url } = await put(filename, blob, {
           access: 'public',
         })
@@ -108,6 +143,27 @@ export async function fetchContentManifest(): Promise<ContentManifest> {
   return (await response.json()) as ContentManifest
 }
 
+export async function fetchArchiveManifest(): Promise<ContentManifest | null> {
+  try {
+    const info = await head('archive-manifest.json')
+
+    // Fetch without next.js caching
+    console.log(`Fetching archive manifest from ${info.url}`)
+    const response = await fetch(info.url, {
+      next: { revalidate: 0 },
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    return (await response.json()) as ContentManifest
+  } catch (error) {
+    console.log('Archive manifest not found or failed to fetch')
+    return null
+  }
+}
+
 export async function saveContentManifest(
   manifest: ContentManifest
 ): Promise<void> {
@@ -124,7 +180,10 @@ export async function saveContentManifest(
   console.log(`Saved content manifest to ${url}`)
 }
 
-function mergeManifests(manifest: ContentManifest, newPosts: ContentManifest) {
+function mergeManifests(
+  manifest: ContentManifest,
+  newPosts: ContentManifest
+): ContentManifest {
   const allPosts = [...manifest.posts, ...newPosts.posts]
 
   const uniquePosts = allPosts.reduce((acc, post) => {
@@ -140,8 +199,13 @@ function mergeManifests(manifest: ContentManifest, newPosts: ContentManifest) {
     return dateB.toMillis() - dateA.toMillis()
   })
 
-  manifest.posts = uniquePosts
-  manifest.hash = generateHashForManifest(manifest)
+  const mergedManifest = {
+    ...manifest,
+    posts: uniquePosts,
+  }
+
+  mergedManifest.hash = generateHashForManifest(mergedManifest)
+  return mergedManifest
 }
 
 function getFileExtensionFromMimeType(contentType: string): string {
