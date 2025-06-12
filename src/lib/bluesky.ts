@@ -88,6 +88,9 @@ export class BlueskyFeedBuilder implements FeedBuilder {
               images.push({
                 type: 'image',
                 cdnUrl: cdn,
+                altText: img.alt || '',
+                width: img.aspectRatio?.width || 0,
+                height: img.aspectRatio?.height || 0,
               })
             } else {
               console.warn('Image ref is not a link!', img.image)

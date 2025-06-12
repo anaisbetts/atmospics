@@ -4,6 +4,10 @@ import { DateTime } from 'luxon'
 export interface ImageContent {
   type: 'video' | 'image'
   cdnUrl: string
+  altText: string
+  width: number
+  height: number
+  geolocation?: number[] // lat/lng
 }
 
 export interface Post {
