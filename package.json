@@ -8,7 +8,6 @@
     "next-build": "next build",
     "start": "next start",
     "lint": "biome check",
-    "lint:ci": "biome check && next lint",
     "f": "biome check --fix --unsafe",
     "test": "jest --no-color"
   },
