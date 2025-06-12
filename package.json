@@ -5,15 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "next-build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "lint:ci": "next lint --max-warnings 0 && npm run format:check",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "f": "npm run format && npm run lint"
+    "lint": "biome check",
+    "lint:ci": "biome check && next lint",
+    "f": "biome check --fix --unsafe",
+    "test": "jest --no-color"
   },
   "dependencies": {
     "@anaisbetts/commands": "^0.3.2",
@@ -51,8 +48,5 @@
     "typescript": "^5",
     "vercel": "^43.0.0"
   },
-  "trustedDependencies": [
-    "@biomejs/biome",
-    "@tailwindcss/oxide"
-  ]
+  "trustedDependencies": ["@biomejs/biome", "@tailwindcss/oxide"]
 }
