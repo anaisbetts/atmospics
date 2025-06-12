@@ -2,6 +2,11 @@ import { BlueskyFeedBuilder } from '../bluesky'
 
 describe('BlueskyFeedBuilder', () => {
   it('should fetch posts from BSKY_TARGET', async () => {
+    if (process.env.CI) {
+      console.warn('Skipping remote tests in CI environment')
+      return
+    }
+
     const target = process.env.BSKY_TARGET
     expect(target).toBeDefined()
 

@@ -1,6 +1,7 @@
-require('dotenv').config({ path: '.env.local' })
+import * as dotenv from 'dotenv'
+import nextJest from 'next/jest.js'
 
-const nextJest = require('next/jest')
+dotenv.config({ path: '.env.local' })
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files
@@ -17,4 +18,4 @@ const customJestConfig = {
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(customJestConfig)
+export default createJestConfig(customJestConfig)
