@@ -12,7 +12,7 @@
     "test:watch": "jest --watch",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "f": "npm run format && npm run lint",
+    "f": "npm run format && npm run lint"
   },
   "dependencies": {
     "@anaisbetts/commands": "^0.3.2",

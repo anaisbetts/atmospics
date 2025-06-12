@@ -1,54 +1,55 @@
-import AtpAgent from "@atproto/api";
-import { FeedBuilder, Post, ImageContent } from "./types";
-import { DateTime } from "luxon";
+import AtpAgent from '@atproto/api'
+import { DateTime } from 'luxon'
+
+import { FeedBuilder, ImageContent, Post } from './types'
 
 async function createAuthenticatedAgent() {
-  const bskyUser = process.env.BSKY_USER;
-  const bskyPass = process.env.BSKY_PASS;
+  const bskyUser = process.env.BSKY_USER
+  const bskyPass = process.env.BSKY_PASS
 
   if (!bskyUser || !bskyPass) {
     throw new Error(
-      "BSKY_USER and BSKY_PASS environment variables are required"
-    );
+      'BSKY_USER and BSKY_PASS environment variables are required'
+    )
   }
 
   const agent = new AtpAgent({
-    service: "https://bsky.social",
-  });
+    service: 'https://bsky.social',
+  })
 
   await agent.login({
     identifier: bskyUser,
     password: bskyPass,
-  });
+  })
 
-  return agent;
+  return agent
 }
 
 export class BlueskyFeedBuilder implements FeedBuilder {
-  private handle: string;
+  private handle: string
 
   constructor(handle: string) {
-    this.handle = handle;
+    this.handle = handle
   }
 
   async extractPosts(since?: DateTime): Promise<Post[]> {
     try {
-      const agent = await createAuthenticatedAgent();
+      const agent = await createAuthenticatedAgent()
 
       // First, resolve target's profile to get their DID
       const profileResponse = await agent.getProfile({
         actor: this.handle,
-      });
+      })
 
       if (!profileResponse.success) {
-        throw new Error(`Could not find ${this.handle} profile`);
+        throw new Error(`Could not find ${this.handle} profile`)
       }
 
-      const targetDid = profileResponse.data.did;
+      const targetDid = profileResponse.data.did
 
-      const allPosts: Post[] = [];
-      let cursor: string | undefined;
-      let shouldContinue = true;
+      const allPosts: Post[] = []
+      let cursor: string | undefined
+      let shouldContinue = true
 
       while (shouldContinue) {
         // Fetch target's posts with pagination
@@ -56,60 +57,59 @@ export class BlueskyFeedBuilder implements FeedBuilder {
           actor: targetDid,
           limit: 50,
           cursor,
-        });
+        })
 
         if (!postsResponse.success) {
-          throw new Error("Failed to fetch posts");
+          throw new Error('Failed to fetch posts')
         }
 
         // Extract post content and images
         const posts: Post[] = postsResponse.data.feed.map((item) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const record = item.post.record as Record<string, any>;
-          const images: ImageContent[] = [];
+          const record = item.post.record as Record<string, any>
+          const images: ImageContent[] = []
 
           // Extract images from embed
           if (record.embed?.images) {
             for (const img of record.embed.images) {
               if (img.image?.ref) {
                 images.push({
-                  type: "image",
+                  type: 'image',
                   cdnUrl: `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${targetDid}&cid=${img.image.ref.$link}`,
-                });
+                })
               }
             }
           }
 
           return {
             images,
-            text: record.text || "No text content",
+            text: record.text || 'No text content',
             createdAt: record.createdAt || item.post.indexedAt,
-          };
-        });
+          }
+        })
 
         // Filter posts by 'since' date if provided
         for (const post of posts) {
-          const postDate = DateTime.fromISO(post.createdAt);
-          
+          const postDate = DateTime.fromISO(post.createdAt)
+
           if (since && postDate < since) {
-            shouldContinue = false;
-            break;
+            shouldContinue = false
+            break
           }
-          
-          allPosts.push(post);
+
+          allPosts.push(post)
         }
 
         // Check if there are more posts to fetch
-        cursor = postsResponse.data.cursor;
+        cursor = postsResponse.data.cursor
         if (!cursor || postsResponse.data.feed.length === 0) {
-          shouldContinue = false;
+          shouldContinue = false
         }
       }
 
-      return allPosts;
+      return allPosts
     } catch (error) {
-      console.error("Error fetching Bluesky posts:", error);
-      return [];
+      console.error('Error fetching Bluesky posts:', error)
+      return []
     }
   }
 }

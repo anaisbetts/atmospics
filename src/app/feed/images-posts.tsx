@@ -1,86 +1,91 @@
-import AtpAgent from "@atproto/api";
-import { unstable_cache } from 'next/cache';
+import AtpAgent from '@atproto/api'
+import { unstable_cache } from 'next/cache'
 
 interface Post {
-  text: string;
-  createdAt: string;
-  uri: string;
+  text: string
+  createdAt: string
+  uri: string
 }
 
 async function createAuthenticatedAgent() {
-  const bskyUser = process.env.BSKY_USER;
-  const bskyPass = process.env.BSKY_PASS;
+  const bskyUser = process.env.BSKY_USER
+  const bskyPass = process.env.BSKY_PASS
 
   if (!bskyUser || !bskyPass) {
-    throw new Error("BSKY_USER and BSKY_PASS environment variables are required");
+    throw new Error(
+      'BSKY_USER and BSKY_PASS environment variables are required'
+    )
   }
 
   const agent = new AtpAgent({
-    service: "https://bsky.social",
-  });
+    service: 'https://bsky.social',
+  })
 
   await agent.login({
     identifier: bskyUser,
     password: bskyPass,
-  });
+  })
 
-  return agent;
+  return agent
 }
 
-async function fetchPostsWithAgent(agent: AtpAgent, targetHandle: string): Promise<Post[]> {
+async function fetchPostsWithAgent(
+  agent: AtpAgent,
+  targetHandle: string
+): Promise<Post[]> {
   // First, resolve target's profile to get their DID
   const profileResponse = await agent.getProfile({
     actor: targetHandle,
-  });
+  })
 
   if (!profileResponse.success) {
-    throw new Error(`Could not find ${targetHandle} profile`);
+    throw new Error(`Could not find ${targetHandle} profile`)
   }
 
-  const targetDid = profileResponse.data.did;
+  const targetDid = profileResponse.data.did
 
   // Fetch target's posts
   const postsResponse = await agent.getAuthorFeed({
     actor: targetDid,
     limit: 20,
-  });
+  })
 
   if (!postsResponse.success) {
-    throw new Error("Failed to fetch posts");
+    throw new Error('Failed to fetch posts')
   }
 
   // Extract post content
   const posts = postsResponse.data.feed.map((item) => ({
     text:
-      (item.post.record as Record<string, string>)?.text || "No text content",
+      (item.post.record as Record<string, string>)?.text || 'No text content',
     createdAt:
       (item.post.record as Record<string, string>)?.createdAt ||
       item.post.indexedAt,
     uri: item.post.uri,
-  }));
+  }))
 
-  return posts;
+  return posts
 }
 
 const getCachedPosts = unstable_cache(
   async (targetHandle: string) => {
-    const agent = await createAuthenticatedAgent();
-    return await fetchPostsWithAgent(agent, targetHandle);
+    const agent = await createAuthenticatedAgent()
+    return await fetchPostsWithAgent(agent, targetHandle)
   },
   ['bluesky-posts'],
   {
     revalidate: 5 * 60, // 5 minutes
-    tags: ['bluesky-posts']
+    tags: ['bluesky-posts'],
   }
-);
+)
 
 async function fetchImagesPosts(): Promise<Post[]> {
-  const bskyTarget = process.env.BSKY_TARGET || "dril.bsky.social";
-  return await getCachedPosts(bskyTarget);
+  const bskyTarget = process.env.BSKY_TARGET || 'dril.bsky.social'
+  return await getCachedPosts(bskyTarget)
 }
 
 export default async function ImagesPosts() {
-  const posts = await fetchImagesPosts();
+  const posts = await fetchImagesPosts()
 
   return (
     <>
@@ -104,5 +109,5 @@ export default async function ImagesPosts() {
         </ul>
       )}
     </>
-  );
+  )
 }

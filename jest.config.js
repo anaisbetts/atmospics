@@ -12,7 +12,7 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'node',
   transformIgnorePatterns: [
-    'node_modules/(?!(multiformats|@atproto|uint8arrays)/)'
+    'node_modules/(?!(multiformats|@atproto|uint8arrays)/)',
   ],
 }
 
