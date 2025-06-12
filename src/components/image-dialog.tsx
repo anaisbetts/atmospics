@@ -1,0 +1,89 @@
+'use client'
+
+import Image from 'next/image'
+import { useEffect, useRef } from 'react'
+
+interface ImageDialogProps {
+  src: string
+  alt: string
+  isOpen: boolean
+  onClose: () => void
+}
+
+export default function ImageDialog({
+  src,
+  alt,
+  isOpen,
+  onClose,
+}: ImageDialogProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null)
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+
+    if (isOpen) {
+      dialog.showModal()
+    } else {
+      dialog.close()
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+
+    const handleClose = () => {
+      onClose()
+    }
+
+    dialog.addEventListener('close', handleClose)
+    return () => dialog.removeEventListener('close', handleClose)
+  }, [onClose])
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
+  return (
+    <dialog
+      ref={dialogRef}
+      onClick={handleBackdropClick}
+      className="bg-transparent p-0 max-w-none max-h-none w-screen h-screen"
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      }}
+    >
+      <div
+        className="relative flex items-center justify-center"
+        style={{
+          width: 'calc(100vw - 128px)',
+          height: 'calc(100vh - 128px)',
+          margin: '64px',
+        }}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-opacity-75"
+        >
+          ×
+        </button>
+        <Image
+          src={src}
+          alt={alt}
+          width={0}
+          height={0}
+          sizes="100vw"
+          className="object-contain"
+          style={{
+            width: 'auto',
+            height: '100%',
+            maxWidth: '100%',
+          }}
+        />
+      </div>
+    </dialog>
+  )
+}

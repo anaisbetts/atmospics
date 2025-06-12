@@ -1,8 +1,10 @@
-import { Suspense } from 'react'
+import { loadFullContentManifest } from '@/lib/uploader'
 
-import ImagesPosts from './feed/images-posts'
+import ImageGrid from '../components/image-grid'
 
-export default function Home() {
+export default async function Home() {
+  const manifest = await loadFullContentManifest()
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
@@ -18,15 +20,7 @@ export default function Home() {
           </h2>
         </div>
 
-        <Suspense
-          fallback={
-            <div className="text-center text-gray-500 py-8">
-              Loading posts...
-            </div>
-          }
-        >
-          <ImagesPosts />
-        </Suspense>
+        <ImageGrid manifest={manifest} />
       </main>
     </div>
   )
