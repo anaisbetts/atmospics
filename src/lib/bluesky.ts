@@ -99,7 +99,7 @@ export class BlueskyFeedBuilder implements FeedBuilder {
         }
 
         return {
-          id: item.post.uri,
+          id: item.post.cid.toString(),
           images,
           text: record.text || 'No text content',
           createdAt: record.createdAt || item.post.indexedAt,
@@ -115,7 +115,10 @@ export class BlueskyFeedBuilder implements FeedBuilder {
           break
         }
 
-        allPosts.push(post)
+        // Only add posts that are newer than or equal to 'since'
+        if (!since || postDate >= since) {
+          allPosts.push(post)
+        }
       }
 
       // Check if there are more posts to fetch
