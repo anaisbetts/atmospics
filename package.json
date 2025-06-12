@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:ci": "next lint --max-warnings 0 && npm run format:check",
     "test": "jest",
     "test:watch": "jest --watch",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "f": "npm run format && npm run lint",
   },
   "dependencies": {
     "@anaisbetts/commands": "^0.3.2",
