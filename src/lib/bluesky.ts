@@ -65,6 +65,7 @@ export class BlueskyFeedBuilder implements FeedBuilder {
 
         // Extract post content and images
         const posts: Post[] = postsResponse.data.feed.map((item) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const record = item.post.record as Record<string, any>
           const images: ImageContent[] = []
 
