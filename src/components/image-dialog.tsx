@@ -3,19 +3,22 @@
 import Image from 'next/image'
 import { useEffect, useRef } from 'react'
 
+import { Post } from '@/lib/types'
+
 interface ImageDialogProps {
-  src: string
-  alt: string
+  post: Post
   isOpen: boolean
   onClose: () => void
 }
 
 export default function ImageDialog({
-  src,
-  alt,
+  post,
   isOpen,
   onClose,
 }: ImageDialogProps) {
+  const src = post.images[0].cdnUrl
+  const alt = ''
+
   const dialogRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
