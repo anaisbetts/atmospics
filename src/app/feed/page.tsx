@@ -1,14 +1,13 @@
-import { Suspense } from 'react';
-import ImagesPosts from './images-posts';
+import { Suspense } from 'react'
+
+import ImagesPosts from './images-posts'
 
 export default function Feed() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">
-            BlueSky Posts
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900">BlueSky Posts</h1>
         </div>
       </header>
 
@@ -19,14 +18,16 @@ export default function Feed() {
           </h2>
         </div>
 
-        <Suspense fallback={
-          <div className="text-center text-gray-500 py-8">
-            Loading posts...
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div className="text-center text-gray-500 py-8">
+              Loading posts...
+            </div>
+          }
+        >
           <ImagesPosts />
         </Suspense>
       </main>
     </div>
-  );
+  )
 }
