@@ -16,7 +16,6 @@ export default function ImageDialog({
   isOpen,
   onClose,
 }: ImageDialogProps) {
-
   const dialogRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
@@ -71,9 +70,9 @@ export default function ImageDialog({
         >
           ×
         </button>
-        <PostCarousel 
-          images={post.images} 
-          className="w-full h-full max-h-full"
+        <PostCarousel
+          images={post.images}
+          className="h-full max-h-full w-full"
         />
       </div>
     </dialog>

@@ -40,7 +40,7 @@ export function PostCarousel({ images, className }: PostCarouselProps) {
   if (images.length === 0) return null
 
   return (
-    <div className={cn('relative group bg-red-300', className)}>
+    <div className={cn('group relative bg-red-300', className)}>
       <Carousel
         setApi={setApi}
         className="w-full"
@@ -52,7 +52,7 @@ export function PostCarousel({ images, className }: PostCarouselProps) {
         <CarouselContent>
           {images.map((image, index) => (
             <CarouselItem key={index}>
-              <div className="relative w-full h-full flex items-center justify-center bg-green-400">
+              <div className="relative flex h-full w-full items-center justify-center bg-green-400">
                 {image.type === 'image' ? (
                   <Image
                     src={image.cdnUrl}
@@ -63,7 +63,7 @@ export function PostCarousel({ images, className }: PostCarouselProps) {
                 ) : (
                   <video
                     src={image.cdnUrl}
-                    className="w-full h-full object-contain"
+                    className="h-full w-full object-contain"
                     controls
                     preload="metadata"
                   />
@@ -78,18 +78,18 @@ export function PostCarousel({ images, className }: PostCarouselProps) {
           <>
             <button
               onClick={() => api?.scrollPrev()}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+              className="-translate-y-1/2 absolute top-1/2 left-2 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
               disabled={current === 1}
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="h-5 w-5" />
               <span className="sr-only">Previous image</span>
             </button>
             <button
               onClick={() => api?.scrollNext()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+              className="-translate-y-1/2 absolute top-1/2 right-2 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
               disabled={current === count}
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="h-5 w-5" />
               <span className="sr-only">Next image</span>
             </button>
           </>
@@ -98,13 +98,13 @@ export function PostCarousel({ images, className }: PostCarouselProps) {
 
       {/* Dots Indicator - Only show if more than 1 image */}
       {images.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+        <div className="-translate-x-1/2 absolute bottom-4 left-1/2 z-10 flex space-x-2">
           {Array.from({ length: count }).map((_, index) => (
             <button
               key={index}
               onClick={() => api?.scrollTo(index)}
               className={cn(
-                'w-2 h-2 rounded-full transition-all duration-200',
+                'h-2 w-2 rounded-full transition-all duration-200',
                 index + 1 === current
                   ? 'bg-white'
                   : 'bg-white/50 hover:bg-white/70'
