@@ -1,5 +1,5 @@
 import { asyncMap } from '@anaisbetts/commands'
-import { head, put } from '@vercel/blob'
+import { del, head, list, put } from '@vercel/blob'
 import { DateTime } from 'luxon'
 
 import { BlueskyFeedBuilder } from './bluesky'
@@ -180,4 +180,56 @@ function getFileExtensionFromMimeType(contentType: string): string {
   }
 
   return ''
+}
+
+export async function deleteContentManifest(): Promise<void> {
+  try {
+    await del('content-manifest.json')
+    console.log('Content manifest deleted successfully')
+  } catch (error) {
+    console.error('Failed to delete content manifest:', error)
+    throw error
+  }
+}
+
+export async function cleanupUnusedBlobs(): Promise<void> {
+  try {
+    const manifest = await fetchContentManifest()
+    const { blobs } = await list()
+
+    const usedUrls = new Set<string>()
+
+    // Add manifest URL
+    usedUrls.add('content-manifest.json')
+
+    // Collect all URLs from the manifest
+    for (const post of manifest.posts) {
+      for (const image of post.images) {
+        if (image.cdnUrl.includes('blob.vercel-storage.com')) {
+          const pathname = new URL(image.cdnUrl).pathname
+          const filename = pathname.split('/').pop()
+          if (filename) {
+            usedUrls.add(filename)
+          }
+        }
+      }
+    }
+
+    // Delete unused blobs
+    const deletionPromises = []
+    for (const blob of blobs) {
+      if (!usedUrls.has(blob.pathname)) {
+        console.log(`Deleting unused blob: ${blob.pathname}`)
+        deletionPromises.push(del(blob.url))
+      }
+    }
+
+    await Promise.all(deletionPromises)
+    console.log(
+      `Cleanup completed. Deleted ${deletionPromises.length} unused blobs.`
+    )
+  } catch (error) {
+    console.error('Failed to cleanup unused blobs:', error)
+    throw error
+  }
 }
