@@ -50,7 +50,7 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
   // Update content
   const feedBuilder = new BlueskyFeedBuilder(process.env.BSKY_TARGET!)
   const newPosts = await feedBuilder.extractPosts(
-    manifest ? DateTime.fromISO(manifest.createdAt) : undefined
+    manifest ? DateTime.fromISO(manifest.posts[0].createdAt) : undefined
   )
 
   if (!manifest) {
@@ -148,6 +148,7 @@ export async function fetchArchiveManifest(): Promise<ContentManifest | null> {
     const info = await head('archive-manifest.json')
 
     // Fetch without next.js caching
+    console.log(`Fetching archive manifest from ${info.url}`)
     const response = await fetch(info.url, {
       next: { revalidate: 0 },
     })
