@@ -17,6 +17,31 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
     )
   }
 
+  // Try to fetch and merge archive manifest
+  try {
+    const archiveManifest = await fetchArchiveManifest()
+    if (archiveManifest) {
+      console.log(
+        `Found archive manifest with ${archiveManifest.posts.length} posts`
+      )
+
+      if (!manifest) {
+        manifest = {
+          createdAt: archiveManifest.createdAt,
+          hash: '',
+          posts: [],
+        }
+      }
+
+      mergeManifests(manifest, archiveManifest)
+      console.log(
+        `Merged archive manifest, now have ${manifest.posts.length} total posts`
+      )
+    }
+  } catch (error) {
+    console.error('Failed to fetch or merge archive manifest:', error)
+  }
+
   // Update content
   const feedBuilder = new BlueskyFeedBuilder(process.env.BSKY_TARGET!)
   const newPosts = await feedBuilder.extractPosts(
@@ -106,6 +131,26 @@ export async function fetchContentManifest(): Promise<ContentManifest> {
   })
 
   return (await response.json()) as ContentManifest
+}
+
+export async function fetchArchiveManifest(): Promise<ContentManifest | null> {
+  try {
+    const info = await head('archive-manifest.json')
+
+    // Fetch without next.js caching
+    const response = await fetch(info.url, {
+      next: { revalidate: 0 },
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    return (await response.json()) as ContentManifest
+  } catch (error) {
+    console.log('Archive manifest not found or failed to fetch')
+    return null
+  }
 }
 
 export async function saveContentManifest(

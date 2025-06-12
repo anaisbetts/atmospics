@@ -1,15 +1,15 @@
+import crypto from 'crypto'
+import path from 'path'
 import { asyncMap } from '@anaisbetts/commands'
 import { put } from '@vercel/blob'
-import { DateTime } from 'luxon'
-import path from 'path'
 import fs from 'fs/promises'
+import { DateTime } from 'luxon'
 import sharp from 'sharp'
-import crypto from 'crypto'
 
 import {
   ContentManifest,
-  Post,
   ImageContent,
+  Post,
   generateHashForManifest,
 } from '../src/lib/types'
 
@@ -124,7 +124,7 @@ async function convertInstagramPost(
 
     // Extract text from title
     const text = firstMedia.title || ''
-    
+
     // Log any non-ASCII characters for debugging
     if (text && /[^\x00-\x7F]/.test(text)) {
       console.log(`  📝 Post contains Unicode text: "${text}"`)
