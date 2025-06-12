@@ -11,13 +11,16 @@ describe('BlueskyFeedBuilder', () => {
     expect(target).toBeDefined()
 
     const feedBuilder = new BlueskyFeedBuilder(target!)
-    const posts = await feedBuilder.extractPosts()
+    const manifest = await feedBuilder.extractPosts()
 
-    expect(Array.isArray(posts)).toBe(true)
-    expect(posts.length).toBeGreaterThanOrEqual(0)
+    expect(manifest).toHaveProperty('createdAt')
+    expect(manifest).toHaveProperty('hash')
+    expect(manifest).toHaveProperty('posts')
+    expect(Array.isArray(manifest.posts)).toBe(true)
+    expect(manifest.posts.length).toBeGreaterThanOrEqual(0)
 
-    if (posts.length > 0) {
-      const post = posts[0]
+    if (manifest.posts.length > 0) {
+      const post = manifest.posts[0]
       expect(post).toHaveProperty('text')
       expect(post).toHaveProperty('images')
       expect(post).toHaveProperty('createdAt')

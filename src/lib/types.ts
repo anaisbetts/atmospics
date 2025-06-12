@@ -11,6 +11,12 @@ export interface Post {
   createdAt: string
 }
 
+export interface ContentManifest {
+  createdAt: string
+  hash: string
+  posts: Post[]
+}
+
 export interface FeedBuilder {
-  extractPosts(since?: DateTime): Promise<Post[]>
+  extractPosts(since?: DateTime): Promise<ContentManifest>
 }
