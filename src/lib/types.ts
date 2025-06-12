@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 export interface ImageContent {
   type: "video" | "image";
   cdnUrl: string;
@@ -10,5 +12,5 @@ export interface Post {
 }
 
 export interface FeedBuilder {
-  extractPosts(): Promise<Post[]>;
+  extractPosts(since?: DateTime): Promise<Post[]>;
 }
