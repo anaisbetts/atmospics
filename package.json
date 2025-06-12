@@ -20,6 +20,7 @@
     "@atproto/api": "^0.15.14",
     "@vercel/blob": "^1.1.1",
     "luxon": "^3.6.1",
+    "multiformats": "^13.3.7",
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

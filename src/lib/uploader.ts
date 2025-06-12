@@ -1,0 +1,183 @@
+import { asyncMap } from '@anaisbetts/commands'
+import { head, put } from '@vercel/blob'
+import { DateTime } from 'luxon'
+
+import { BlueskyFeedBuilder } from './bluesky'
+import { ContentManifest, Post, generateHashForManifest } from './types'
+
+export async function loadFullContentManifest(): Promise<ContentManifest> {
+  let manifest: ContentManifest | undefined
+
+  try {
+    manifest = await fetchContentManifest()
+  } catch (error) {
+    console.error(
+      'Failed to fetch content manifest, starting from scratch:',
+      error
+    )
+  }
+
+  // Update content
+  const feedBuilder = new BlueskyFeedBuilder(process.env.BSKY_TARGET!)
+  const newPosts = await feedBuilder.extractPosts(
+    manifest ? DateTime.fromISO(manifest.createdAt) : undefined
+  )
+
+  if (!manifest) {
+    manifest = {
+      createdAt: newPosts.createdAt,
+      hash: '',
+      posts: [],
+    }
+  }
+
+  if (newPosts.posts.length > 0) {
+    mergeManifests(manifest, newPosts)
+  }
+
+  manifest = await rehostContent(manifest)
+
+  await saveContentManifest(manifest)
+  return manifest
+}
+
+export async function rehostContent(
+  manifest: ContentManifest
+): Promise<ContentManifest> {
+  const updatedPosts = await asyncMap(manifest.posts, async (post: Post) => {
+    const updatedImages = []
+
+    for (const image of post.images) {
+      if (image.cdnUrl.includes('blob.vercel-storage.com')) {
+        updatedImages.push(image)
+        continue
+      }
+      try {
+        const response = await fetch(image.cdnUrl)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch image: ${response.statusText}`)
+        }
+
+        const blob = await response.blob()
+        const contentType = response.headers.get('content-type') || blob.type
+        const extension = getFileExtensionFromMimeType(contentType)
+        const filename = `${crypto.randomUUID()}${extension ? '.' + extension : ''}`
+
+        const { url } = await put(filename, blob, {
+          access: 'public',
+        })
+
+        const newPost = {
+          ...image,
+          cdnUrl: url,
+        }
+
+        console.log(`Rehosted image ${image.cdnUrl} to ${newPost.cdnUrl}`)
+        updatedImages.push(newPost)
+      } catch (error) {
+        // XXX: this sucks out loud, what to do here
+        console.warn(`Failed to rehost image ${image.cdnUrl}:`, error)
+        updatedImages.push(image)
+      }
+    }
+
+    return {
+      ...post,
+      images: updatedImages,
+    }
+  })
+
+  const newManifest = {
+    createdAt: manifest.createdAt,
+    hash: '',
+    posts: Array.from(updatedPosts.values()),
+  }
+
+  newManifest.hash = generateHashForManifest(newManifest)
+  return newManifest
+}
+
+export async function fetchContentManifest(): Promise<ContentManifest> {
+  const info = await head('content-manifest.json')
+
+  // Fetch without next.js caching
+  const response = await fetch(info.url, {
+    next: { revalidate: 0 },
+  })
+
+  return (await response.json()) as ContentManifest
+}
+
+export async function saveContentManifest(
+  manifest: ContentManifest
+): Promise<void> {
+  const filename = `content-manifest.json`
+  const blob = new Blob([JSON.stringify(manifest, null, 2)], {
+    type: 'application/json',
+  })
+
+  const { url } = await put(filename, blob, {
+    access: 'public',
+    allowOverwrite: true,
+  })
+
+  console.log(`Saved content manifest to ${url}`)
+}
+
+function mergeManifests(manifest: ContentManifest, newPosts: ContentManifest) {
+  const allPosts = [...manifest.posts, ...newPosts.posts]
+
+  const uniquePosts = allPosts.reduce((acc, post) => {
+    if (!acc.find((p) => p.id === post.id)) {
+      acc.push(post)
+    }
+    return acc
+  }, [] as Post[])
+
+  uniquePosts.sort((a, b) => {
+    const dateA = DateTime.fromISO(a.createdAt)
+    const dateB = DateTime.fromISO(b.createdAt)
+    return dateB.toMillis() - dateA.toMillis()
+  })
+
+  manifest.posts = uniquePosts
+  manifest.hash = generateHashForManifest(manifest)
+}
+
+function getFileExtensionFromMimeType(contentType: string): string {
+  // Image formats
+  if (contentType.includes('image/jpeg') || contentType.includes('image/jpg')) {
+    return 'jpg'
+  } else if (contentType.includes('image/png')) {
+    return 'png'
+  } else if (contentType.includes('image/gif')) {
+    return 'gif'
+  } else if (contentType.includes('image/webp')) {
+    return 'webp'
+  } else if (contentType.includes('image/svg')) {
+    return 'svg'
+  }
+  // Video formats
+  else if (contentType.includes('video/mp4')) {
+    return 'mp4'
+  } else if (contentType.includes('video/webm')) {
+    return 'webm'
+  } else if (contentType.includes('video/ogg')) {
+    return 'ogv'
+  } else if (contentType.includes('video/avi')) {
+    return 'avi'
+  } else if (
+    contentType.includes('video/mov') ||
+    contentType.includes('video/quicktime')
+  ) {
+    return 'mov'
+  } else if (contentType.includes('video/wmv')) {
+    return 'wmv'
+  } else if (contentType.includes('video/flv')) {
+    return 'flv'
+  } else if (contentType.includes('video/mkv')) {
+    return 'mkv'
+  }
+
+  return ''
+}

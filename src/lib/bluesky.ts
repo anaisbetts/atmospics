@@ -1,8 +1,14 @@
 import AtpAgent from '@atproto/api'
-import { createHash } from 'crypto'
 import { DateTime } from 'luxon'
+import { CID } from 'multiformats/cid'
 
-import { ContentManifest, FeedBuilder, ImageContent, Post } from './types'
+import {
+  ContentManifest,
+  FeedBuilder,
+  ImageContent,
+  Post,
+  generateHashForManifest,
+} from './types'
 
 async function createAuthenticatedAgent() {
   const bskyUser = process.env.BSKY_USER
@@ -48,7 +54,6 @@ export class BlueskyFeedBuilder implements FeedBuilder {
     const targetDid = profileResponse.data.did
 
     const allPosts: Post[] = []
-    const postIds: string[] = []
     let cursor: string | undefined
     let shouldContinue = true
 
@@ -70,22 +75,28 @@ export class BlueskyFeedBuilder implements FeedBuilder {
         const record = item.post.record as Record<string, any>
         const images: ImageContent[] = []
 
-        // Store post ID for hash calculation
-        postIds.push(item.post.uri)
-
         // Extract images from embed
         if (record.embed?.images) {
           for (const img of record.embed.images) {
+            console.log('Processing image:', JSON.stringify(img))
+
             if (img.image?.ref) {
+              const cid: CID = img.image.ref
+
+              const cdn = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${targetDid}&cid=${cid.toString()}`
+              console.log('CDN URL:', cdn)
               images.push({
                 type: 'image',
-                cdnUrl: `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${targetDid}&cid=${img.image.ref.$link}`,
+                cdnUrl: cdn,
               })
+            } else {
+              console.warn('Image ref is not a link!', img.image)
             }
           }
         }
 
         return {
+          id: item.post.uri,
           images,
           text: record.text || 'No text content',
           createdAt: record.createdAt || item.post.indexedAt,
@@ -111,14 +122,14 @@ export class BlueskyFeedBuilder implements FeedBuilder {
       }
     }
 
-    // Create hash from all post IDs
-    const postIdsString = postIds.join('')
-    const hash = createHash('sha256').update(postIdsString).digest('hex')
-
-    return {
+    const manifest: ContentManifest = {
       createdAt: new Date().toISOString(),
-      hash,
+      hash: '', // Will be set by generateHashForManifest
       posts: allPosts,
     }
+
+    manifest.hash = generateHashForManifest(manifest)
+
+    return manifest
   }
 }

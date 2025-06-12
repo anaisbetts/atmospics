@@ -21,6 +21,7 @@ describe('BlueskyFeedBuilder', () => {
 
     if (manifest.posts.length > 0) {
       const post = manifest.posts[0]
+      expect(post).toHaveProperty('id')
       expect(post).toHaveProperty('text')
       expect(post).toHaveProperty('images')
       expect(post).toHaveProperty('createdAt')
