@@ -61,8 +61,5 @@
     "vercel": "^43.0.0",
     "vitest": "^3.2.3"
   },
-  "trustedDependencies": [
-    "@biomejs/biome",
-    "@tailwindcss/oxide"
-  ]
+  "trustedDependencies": ["@biomejs/biome", "@tailwindcss/oxide"]
 }

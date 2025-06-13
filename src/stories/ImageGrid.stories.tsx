@@ -13,7 +13,14 @@ const meta: Meta<typeof ImageGrid> = {
   },
   decorators: [
     (Story) => (
-      <div style={{ width: '100vw', maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+      <div
+        style={{
+          width: '100vw',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '20px',
+        }}
+      >
         <Story />
       </div>
     ),
