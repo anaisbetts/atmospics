@@ -178,8 +178,8 @@ export class BlueskyFeedBuilder implements FeedBuilder {
           break
         }
 
-        // Only add posts that are newer than or equal to 'since'
-        if (!since || postDate >= since) {
+        // Only add posts that are newer than 'since'
+        if (!since || postDate > since) {
           allPosts.push(post)
         }
       }
