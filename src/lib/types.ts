@@ -15,6 +15,17 @@ export interface Post {
   images: ImageContent[]
   text: string
   createdAt: string
+  originalContentLink?: string
+  likeCount?: number
+  comments?: Comment[]
+}
+
+export interface Comment {
+  username: string
+  text: string
+  profilePicture: string
+  originalContentLink?: string
+  createdAt?: string
 }
 
 export interface ContentManifest {
