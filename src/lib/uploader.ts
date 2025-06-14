@@ -116,9 +116,58 @@ export async function rehostContent(
       }
     }
 
+    // Process comments and rehost profile pictures
+    const updatedComments = []
+    if (post.comments) {
+      for (const comment of post.comments) {
+        let updatedProfilePicture = comment.profilePicture
+
+        // Only rehost if it's not already on Vercel Blob and has a URL
+        if (
+          updatedProfilePicture &&
+          !updatedProfilePicture.includes('blob.vercel-storage.com')
+        ) {
+          try {
+            const response = await fetch(updatedProfilePicture)
+            if (response.ok) {
+              const blob = await response.blob()
+              const contentType =
+                response.headers.get('content-type') || blob.type
+              const extension = getFileExtensionFromMimeType(contentType)
+              const filename = `profile-${crypto.randomUUID()}${extension ? '.' + extension : ''}`
+
+              console.log(
+                `Rehosting profile picture ${updatedProfilePicture} to ${filename}`
+              )
+              const { url } = await put(filename, blob, {
+                access: 'public',
+              })
+
+              updatedProfilePicture = url
+              console.log(
+                `Rehosted profile picture ${comment.profilePicture} to ${updatedProfilePicture}`
+              )
+            }
+          } catch (error) {
+            console.warn(
+              `Failed to rehost profile picture ${comment.profilePicture}:`,
+              error
+            )
+            // Keep original URL on failure
+          }
+        }
+
+        updatedComments.push({
+          ...comment,
+          profilePicture: updatedProfilePicture,
+        })
+      }
+    }
+
     return {
       ...post,
       images: updatedImages,
+      comments: updatedComments,
     }
   })
 
@@ -274,6 +323,22 @@ export async function cleanupUnusedBlobs(): Promise<void> {
           const filename = pathname.split('/').pop()
           if (filename) {
             usedUrls.add(filename)
+          }
+        }
+      }
+
+      // Collect profile picture URLs from comments
+      if (post.comments) {
+        for (const comment of post.comments) {
+          if (
+            comment.profilePicture &&
+            comment.profilePicture.includes('blob.vercel-storage.com')
+          ) {
+            const pathname = new URL(comment.profilePicture).pathname
+            const filename = pathname.split('/').pop()
+            if (filename) {
+              usedUrls.add(filename)
+            }
           }
         }
       }

@@ -15,6 +15,17 @@ export interface Post {
   images: ImageContent[]
   text: string
   createdAt: string
+  originalContentLink?: string
+  likeCount?: number
+  comments?: Comment[]
+}
+
+export interface Comment {
+  username: string
+  text: string
+  profilePicture: string
+  originalContentLink?: string
+  createdAt?: string
 }
 
 export interface ContentManifest {
@@ -33,6 +44,15 @@ export function generateHashForManifest(manifest: ContentManifest): string {
 
   manifest.posts.forEach((post) => {
     hash.update(post.id)
+
+    // Include comments in hash calculation
+    if (post.comments) {
+      post.comments.forEach((comment) => {
+        hash.update(comment.username)
+        hash.update(comment.text)
+        hash.update(comment.createdAt || '')
+      })
+    }
   })
 
   return hash.digest('hex')
