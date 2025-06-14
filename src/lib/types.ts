@@ -44,6 +44,15 @@ export function generateHashForManifest(manifest: ContentManifest): string {
 
   manifest.posts.forEach((post) => {
     hash.update(post.id)
+
+    // Include comments in hash calculation
+    if (post.comments) {
+      post.comments.forEach((comment) => {
+        hash.update(comment.username)
+        hash.update(comment.text)
+        hash.update(comment.createdAt || '')
+      })
+    }
   })
 
   return hash.digest('hex')

@@ -32,10 +32,14 @@ describe('BlueskyFeedBuilder', () => {
       expect(Array.isArray(post.comments)).toBe(true)
       expect(typeof post.likeCount).toBe('number')
       expect(typeof post.originalContentLink).toBe('string')
-      expect(post.originalContentLink).toMatch(/^https:\/\/bsky\.app\/profile\//)
+      expect(post.originalContentLink).toMatch(
+        /^https:\/\/bsky\.app\/profile\//
+      )
 
       // Check that at least one post has comments
-      const postsWithComments = manifest.posts.filter(p => p.comments && p.comments.length > 0)
+      const postsWithComments = manifest.posts.filter(
+        (p) => p.comments && p.comments.length > 0
+      )
       expect(postsWithComments.length).toBeGreaterThan(0)
 
       // If we found a post with comments, validate comment structure
@@ -52,7 +56,9 @@ describe('BlueskyFeedBuilder', () => {
         expect(typeof comment.profilePicture).toBe('string')
         expect(typeof comment.originalContentLink).toBe('string')
         expect(typeof comment.createdAt).toBe('string')
-        expect(comment.originalContentLink).toMatch(/^https:\/\/bsky\.app\/profile\//)
+        expect(comment.originalContentLink).toMatch(
+          /^https:\/\/bsky\.app\/profile\//
+        )
       }
     }
   }, 30000)
