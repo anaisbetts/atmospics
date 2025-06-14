@@ -150,6 +150,9 @@ async function convertInstagramPost(
       images: validImages,
       text,
       createdAt,
+      originalContentLink: undefined,
+      likeCount: undefined,
+      comments: undefined,
     }
   } catch (error) {
     console.error('Error converting Instagram post:', error)
