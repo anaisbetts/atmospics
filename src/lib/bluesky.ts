@@ -55,8 +55,11 @@ async function fetchCommentsForPost(
 
     const comments: Comment[] = []
 
-    if (thread.replies) {
-      for (const reply of thread.replies) {
+    // Type cast to access replies property
+    const threadViewPost = thread as any
+
+    if (threadViewPost.replies) {
+      for (const reply of threadViewPost.replies) {
         if (reply.$type === 'app.bsky.feed.defs#threadViewPost' && reply.post) {
           const post = reply.post
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
