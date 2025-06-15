@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import ImageGrid from '../components/image-grid'
-import { ContentManifest } from '../lib/types'
+import { ContentManifest, generateHashForPost } from '../lib/types'
 
 const meta: Meta<typeof ImageGrid> = {
   title: 'Components/ImageGrid',
@@ -35,7 +35,7 @@ const sampleManifest: ContentManifest = {
   createdAt: '2025-06-13T00:00:00Z',
   hash: 'sample-hash',
   posts: [
-    {
+    generateHashForPost({
       id: '1',
       text: 'Sample post with single image',
       createdAt: '2025-06-13T00:00:00Z',
@@ -48,8 +48,8 @@ const sampleManifest: ContentManifest = {
           height: 600,
         },
       ],
-    },
-    {
+    }),
+    generateHashForPost({
       id: '2',
       text: 'Sample post with multiple images',
       createdAt: '2025-06-13T01:00:00Z',
@@ -69,8 +69,8 @@ const sampleManifest: ContentManifest = {
           height: 600,
         },
       ],
-    },
-    {
+    }),
+    generateHashForPost({
       id: '3',
       text: 'Another single image post',
       createdAt: '2025-06-13T02:00:00Z',
@@ -83,7 +83,7 @@ const sampleManifest: ContentManifest = {
           height: 600,
         },
       ],
-    },
+    }),
   ],
 }
 
@@ -97,12 +97,12 @@ const manifestWithoutImages: ContentManifest = {
   createdAt: '2025-06-13T00:00:00Z',
   hash: 'no-images-hash',
   posts: [
-    {
+    generateHashForPost({
       id: '1',
       text: 'Post without images',
       createdAt: '2025-06-13T00:00:00Z',
       images: [],
-    },
+    }),
   ],
 }
 

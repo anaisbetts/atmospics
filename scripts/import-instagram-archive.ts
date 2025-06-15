@@ -11,6 +11,7 @@ import {
   ImageContent,
   Post,
   generateHashForManifest,
+  generateHashForPost,
 } from '../src/lib/types'
 
 interface InstagramPost {
@@ -145,7 +146,7 @@ async function convertInstagramPost(
       return null
     }
 
-    return {
+    const postData = {
       id: postId,
       images: validImages,
       text,
@@ -154,6 +155,8 @@ async function convertInstagramPost(
       likeCount: undefined,
       comments: undefined,
     }
+
+    return generateHashForPost(postData)
   } catch (error) {
     console.error('Error converting Instagram post:', error)
     return null

@@ -8,7 +8,9 @@ import {
   FeedBuilder,
   ImageContent,
   Post,
+  generateHashForComment,
   generateHashForManifest,
+  generateHashForPost,
 } from './types'
 
 async function createAuthenticatedAgent() {
@@ -65,7 +67,7 @@ async function fetchCommentsForPost(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const record = post.record as Record<string, any>
 
-          const comment: Comment = {
+          const commentData = {
             username: post.author.handle,
             text: record.text || '',
             profilePicture: post.author.avatar || '',
@@ -73,6 +75,7 @@ async function fetchCommentsForPost(
             createdAt: record.createdAt || post.indexedAt,
           }
 
+          const comment = generateHashForComment(commentData)
           comments.push(comment)
         }
       }
@@ -157,7 +160,7 @@ export class BlueskyFeedBuilder implements FeedBuilder {
           // Fetch comments for this post
           const comments = await fetchCommentsForPost(agent, item.post.uri)
 
-          return {
+          const postData = {
             id: item.post.cid.toString(),
             images,
             text: record.text || 'No text content',
@@ -166,6 +169,8 @@ export class BlueskyFeedBuilder implements FeedBuilder {
             likeCount: item.post.likeCount || 0,
             comments,
           }
+
+          return generateHashForPost(postData)
         })
       )
 
