@@ -3,6 +3,7 @@ import { del, head, list, put } from '@vercel/blob'
 import { DateTime } from 'luxon'
 
 import { BlueskyFeedBuilder } from './bluesky'
+import { ImageCache } from './image-cache'
 import { ContentManifest, Post, generateHashForManifest } from './types'
 
 export async function loadFullContentManifest(): Promise<ContentManifest> {
@@ -49,9 +50,7 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
 
   // Update content
   const feedBuilder = new BlueskyFeedBuilder(process.env.BSKY_TARGET!)
-  const newPosts = await feedBuilder.extractPosts(
-    manifest ? DateTime.fromISO(manifest.posts[0].createdAt) : undefined
-  )
+  const newPosts = await feedBuilder.extractPosts()
 
   if (!manifest) {
     manifest = {
@@ -78,39 +77,20 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
 export async function rehostContent(
   manifest: ContentManifest
 ): Promise<ContentManifest> {
+  const imageCache = new ImageCache()
+  await imageCache.initialize()
+
   const updatedPosts = await asyncMap(manifest.posts, async (post: Post) => {
     const updatedImages = []
 
     for (const image of post.images) {
-      if (image.cdnUrl.includes('blob.vercel-storage.com')) {
-        updatedImages.push(image)
-        continue
-      }
       try {
-        const response = await fetch(image.cdnUrl)
-        if (!response.ok) {
-          throw new Error(`Failed to fetch image: ${response.statusText}`)
-        }
-
-        const blob = await response.blob()
-        const contentType = response.headers.get('content-type') || blob.type
-        const extension = getFileExtensionFromMimeType(contentType)
-        const filename = `${crypto.randomUUID()}${extension ? '.' + extension : ''}`
-
-        console.log(`Rehosting image ${image.cdnUrl} to ${filename}`)
-        const { url } = await put(filename, blob, {
-          access: 'public',
-        })
-
-        const newPost = {
+        const rehostedUrl = await imageCache.rehostContent(image.cdnUrl)
+        updatedImages.push({
           ...image,
-          cdnUrl: url,
-        }
-
-        console.log(`Rehosted image ${image.cdnUrl} to ${newPost.cdnUrl}`)
-        updatedImages.push(newPost)
+          cdnUrl: rehostedUrl,
+        })
       } catch (error) {
-        // XXX: this sucks out loud, what to do here
         console.warn(`Failed to rehost image ${image.cdnUrl}:`, error)
         updatedImages.push(image)
       }
@@ -122,38 +102,16 @@ export async function rehostContent(
       for (const comment of post.comments) {
         let updatedProfilePicture = comment.profilePicture
 
-        // Only rehost if it's not already on Vercel Blob and has a URL
-        if (
-          updatedProfilePicture &&
-          !updatedProfilePicture.includes('blob.vercel-storage.com')
-        ) {
+        if (updatedProfilePicture) {
           try {
-            const response = await fetch(updatedProfilePicture)
-            if (response.ok) {
-              const blob = await response.blob()
-              const contentType =
-                response.headers.get('content-type') || blob.type
-              const extension = getFileExtensionFromMimeType(contentType)
-              const filename = `profile-${crypto.randomUUID()}${extension ? '.' + extension : ''}`
-
-              console.log(
-                `Rehosting profile picture ${updatedProfilePicture} to ${filename}`
-              )
-              const { url } = await put(filename, blob, {
-                access: 'public',
-              })
-
-              updatedProfilePicture = url
-              console.log(
-                `Rehosted profile picture ${comment.profilePicture} to ${updatedProfilePicture}`
-              )
-            }
+            updatedProfilePicture = await imageCache.rehostContent(
+              updatedProfilePicture
+            )
           } catch (error) {
             console.warn(
               `Failed to rehost profile picture ${comment.profilePicture}:`,
               error
             )
-            // Keep original URL on failure
           }
         }
 
@@ -255,44 +213,6 @@ function mergeManifests(
 
   mergedManifest.hash = generateHashForManifest(mergedManifest)
   return mergedManifest
-}
-
-function getFileExtensionFromMimeType(contentType: string): string {
-  // Image formats
-  if (contentType.includes('image/jpeg') || contentType.includes('image/jpg')) {
-    return 'jpg'
-  } else if (contentType.includes('image/png')) {
-    return 'png'
-  } else if (contentType.includes('image/gif')) {
-    return 'gif'
-  } else if (contentType.includes('image/webp')) {
-    return 'webp'
-  } else if (contentType.includes('image/svg')) {
-    return 'svg'
-  }
-  // Video formats
-  else if (contentType.includes('video/mp4')) {
-    return 'mp4'
-  } else if (contentType.includes('video/webm')) {
-    return 'webm'
-  } else if (contentType.includes('video/ogg')) {
-    return 'ogv'
-  } else if (contentType.includes('video/avi')) {
-    return 'avi'
-  } else if (
-    contentType.includes('video/mov') ||
-    contentType.includes('video/quicktime')
-  ) {
-    return 'mov'
-  } else if (contentType.includes('video/wmv')) {
-    return 'wmv'
-  } else if (contentType.includes('video/flv')) {
-    return 'flv'
-  } else if (contentType.includes('video/mkv')) {
-    return 'mkv'
-  }
-
-  return ''
 }
 
 export async function deleteContentManifest(): Promise<void> {
