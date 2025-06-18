@@ -3,20 +3,25 @@ import { del, head, list, put } from '@vercel/blob'
 import { DateTime } from 'luxon'
 
 import { BlueskyFeedBuilder } from './bluesky'
+import { ImageCache } from './image-cache'
 import { ContentManifest, Post, generateHashForManifest } from './types'
 
 export async function loadFullContentManifest(): Promise<ContentManifest> {
-  let manifest: ContentManifest | undefined
-  let shouldSave = false
+  let existingManifest: ContentManifest | undefined
+  let originalHash = ''
 
   try {
-    manifest = await fetchContentManifest()
+    existingManifest = await fetchContentManifest()
+    originalHash = existingManifest.hash
   } catch (error) {
     console.error(
       'Failed to fetch content manifest, starting from scratch:',
       error
     )
   }
+
+  // Generate new manifest from current BlueSky content
+  let newManifest: ContentManifest | undefined
 
   // Try to fetch and merge archive manifest
   try {
@@ -26,159 +31,101 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
         `Found archive manifest with ${archiveManifest.posts.length} posts`
       )
 
-      if (!manifest) {
-        manifest = {
+      if (!newManifest) {
+        newManifest = {
           createdAt: archiveManifest.createdAt,
           hash: '',
           posts: [],
         }
       }
 
-      if (archiveManifest.posts.length > manifest.posts.length) {
-        shouldSave = true
-      }
-
-      manifest = mergeManifests(manifest, archiveManifest)
+      newManifest = mergeManifests(newManifest, archiveManifest)
       console.log(
-        `Merged archive manifest, now have ${manifest.posts.length} total posts`
+        `Merged archive manifest, now have ${newManifest.posts.length} total posts`
       )
     }
   } catch (error) {
     console.error('Failed to fetch or merge archive manifest:', error)
   }
 
-  // Update content
+  // Update content from BlueSky
   const feedBuilder = new BlueskyFeedBuilder(process.env.BSKY_TARGET!)
-  const newPosts = await feedBuilder.extractPosts(
-    manifest ? DateTime.fromISO(manifest.posts[0].createdAt) : undefined
-  )
+  const latestPosts = await feedBuilder.extractPosts()
 
-  if (!manifest) {
-    manifest = {
-      createdAt: newPosts.createdAt,
+  if (!newManifest) {
+    newManifest = {
+      createdAt: latestPosts.createdAt,
       hash: '',
       posts: [],
     }
   }
 
-  if (newPosts.posts.length > 0) {
-    shouldSave = true
-    manifest = mergeManifests(manifest, newPosts)
+  if (latestPosts.posts.length > 0) {
+    newManifest = mergeManifests(newManifest, latestPosts)
   }
 
-  manifest = await rehostContent(manifest)
+  // Generate hash for the new manifest
+  newManifest.hash = generateHashForManifest(newManifest)
 
-  if (shouldSave) {
-    await saveContentManifest(manifest)
+  // Compare with existing manifest and only save if different
+  if (newManifest.hash !== originalHash) {
+    console.log('Manifest content changed, uploading new version')
+    await saveContentManifest(newManifest)
+  } else {
+    console.log('Manifest content unchanged, skipping upload')
+    // Use existing manifest if no changes
+    if (existingManifest) {
+      newManifest = existingManifest
+    }
   }
 
-  return manifest
+  // Rehost images from the manifest (this doesn't modify the manifest)
+  await rehostContent(newManifest)
+
+  return newManifest
 }
 
 export async function rehostContent(
   manifest: ContentManifest
-): Promise<ContentManifest> {
-  const updatedPosts = await asyncMap(manifest.posts, async (post: Post) => {
-    const updatedImages = []
+): Promise<ImageCache> {
+  const imageCache = new ImageCache()
+  await imageCache.initialize()
 
+  // Process all images in the manifest without modifying the manifest structure
+  for (const post of manifest.posts) {
+    // Process post images
     for (const image of post.images) {
-      if (image.cdnUrl.includes('blob.vercel-storage.com')) {
-        updatedImages.push(image)
-        continue
-      }
       try {
-        const response = await fetch(image.cdnUrl)
-        if (!response.ok) {
-          throw new Error(`Failed to fetch image: ${response.statusText}`)
-        }
-
-        const blob = await response.blob()
-        const contentType = response.headers.get('content-type') || blob.type
-        const extension = getFileExtensionFromMimeType(contentType)
-        const filename = `${crypto.randomUUID()}${extension ? '.' + extension : ''}`
-
-        console.log(`Rehosting image ${image.cdnUrl} to ${filename}`)
-        const { url } = await put(filename, blob, {
-          access: 'public',
-        })
-
-        const newPost = {
-          ...image,
-          cdnUrl: url,
-        }
-
-        console.log(`Rehosted image ${image.cdnUrl} to ${newPost.cdnUrl}`)
-        updatedImages.push(newPost)
+        await imageCache.rehostContent(image.cdnUrl)
       } catch (error) {
-        // XXX: this sucks out loud, what to do here
         console.warn(`Failed to rehost image ${image.cdnUrl}:`, error)
-        updatedImages.push(image)
       }
     }
 
-    // Process comments and rehost profile pictures
-    const updatedComments = []
+    // Process profile pictures in comments
     if (post.comments) {
       for (const comment of post.comments) {
-        let updatedProfilePicture = comment.profilePicture
-
-        // Only rehost if it's not already on Vercel Blob and has a URL
-        if (
-          updatedProfilePicture &&
-          !updatedProfilePicture.includes('blob.vercel-storage.com')
-        ) {
+        if (comment.profilePicture) {
           try {
-            const response = await fetch(updatedProfilePicture)
-            if (response.ok) {
-              const blob = await response.blob()
-              const contentType =
-                response.headers.get('content-type') || blob.type
-              const extension = getFileExtensionFromMimeType(contentType)
-              const filename = `profile-${crypto.randomUUID()}${extension ? '.' + extension : ''}`
-
-              console.log(
-                `Rehosting profile picture ${updatedProfilePicture} to ${filename}`
-              )
-              const { url } = await put(filename, blob, {
-                access: 'public',
-              })
-
-              updatedProfilePicture = url
-              console.log(
-                `Rehosted profile picture ${comment.profilePicture} to ${updatedProfilePicture}`
-              )
-            }
+            await imageCache.rehostContent(comment.profilePicture)
           } catch (error) {
             console.warn(
               `Failed to rehost profile picture ${comment.profilePicture}:`,
               error
             )
-            // Keep original URL on failure
           }
         }
-
-        updatedComments.push({
-          ...comment,
-          profilePicture: updatedProfilePicture,
-        })
       }
     }
-
-    return {
-      ...post,
-      images: updatedImages,
-      comments: updatedComments,
-    }
-  })
-
-  const newManifest = {
-    createdAt: manifest.createdAt,
-    hash: '',
-    posts: Array.from(updatedPosts.values()),
   }
 
-  newManifest.hash = generateHashForManifest(newManifest)
-  return newManifest
+  await imageCache.serialize()
+
+  console.log(
+    `Completed rehosting check for manifest with ${manifest.posts.length} posts`
+  )
+
+  return imageCache
 }
 
 export async function fetchContentManifest(): Promise<ContentManifest> {
@@ -217,6 +164,29 @@ export async function saveContentManifest(
   manifest: ContentManifest
 ): Promise<void> {
   const filename = `content-manifest.json`
+
+  // Check if we need to merge with remote changes right before upload
+  try {
+    const remoteManifest = await fetchContentManifest()
+
+    if (remoteManifest.hash !== manifest.hash) {
+      console.log(
+        'Remote manifest has changed, checking if upload is still needed'
+      )
+
+      // If the remote manifest is different but has the same content hash, skip upload
+      if (remoteManifest.hash === generateHashForManifest(manifest)) {
+        console.log(
+          'Remote manifest already matches our content, skipping upload'
+        )
+        return
+      }
+    }
+  } catch (error) {
+    // Remote manifest doesn't exist or couldn't be fetched, proceed with upload
+    console.log('Remote manifest not found, proceeding with upload')
+  }
+
   const blob = new Blob([JSON.stringify(manifest, null, 2)], {
     type: 'application/json',
   })
@@ -255,44 +225,6 @@ function mergeManifests(
 
   mergedManifest.hash = generateHashForManifest(mergedManifest)
   return mergedManifest
-}
-
-function getFileExtensionFromMimeType(contentType: string): string {
-  // Image formats
-  if (contentType.includes('image/jpeg') || contentType.includes('image/jpg')) {
-    return 'jpg'
-  } else if (contentType.includes('image/png')) {
-    return 'png'
-  } else if (contentType.includes('image/gif')) {
-    return 'gif'
-  } else if (contentType.includes('image/webp')) {
-    return 'webp'
-  } else if (contentType.includes('image/svg')) {
-    return 'svg'
-  }
-  // Video formats
-  else if (contentType.includes('video/mp4')) {
-    return 'mp4'
-  } else if (contentType.includes('video/webm')) {
-    return 'webm'
-  } else if (contentType.includes('video/ogg')) {
-    return 'ogv'
-  } else if (contentType.includes('video/avi')) {
-    return 'avi'
-  } else if (
-    contentType.includes('video/mov') ||
-    contentType.includes('video/quicktime')
-  ) {
-    return 'mov'
-  } else if (contentType.includes('video/wmv')) {
-    return 'wmv'
-  } else if (contentType.includes('video/flv')) {
-    return 'flv'
-  } else if (contentType.includes('video/mkv')) {
-    return 'mkv'
-  }
-
-  return ''
 }
 
 export async function deleteContentManifest(): Promise<void> {
