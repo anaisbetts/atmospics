@@ -34,7 +34,7 @@ export class ImageCache {
     this.cache = new Map(Object.entries(data.cache))
   }
 
-  private async serialize(): Promise<void> {
+  async serialize(): Promise<void> {
     const currentData: ImageCacheData = {
       hash: this.generateHash(),
       cache: Object.fromEntries(this.cache),
@@ -94,27 +94,15 @@ export class ImageCache {
     return crypto.createHash('sha256').update(dataToHash).digest('hex')
   }
 
-  private stripQueryParams(url: string): string {
-    try {
-      const urlObj = new URL(url)
-      return `${urlObj.origin}${urlObj.pathname}`
-    } catch {
-      return url
-    }
-  }
-
   async rehostContent(imageUrl: string): Promise<string> {
-    const cleanUrl = this.stripQueryParams(imageUrl)
-
     // Check if already cached
-    if (this.cache.has(cleanUrl)) {
-      return this.cache.get(cleanUrl)!
+    if (this.cache.has(imageUrl)) {
+      return this.cache.get(imageUrl)!
     }
 
     // Skip if already on Vercel Blob
     if (imageUrl.includes('blob.vercel-storage.com')) {
-      this.cache.set(cleanUrl, imageUrl)
-      await this.serialize()
+      this.cache.set(imageUrl, imageUrl)
       return imageUrl
     }
 
@@ -134,18 +122,28 @@ export class ImageCache {
         access: 'public',
       })
 
-      this.cache.set(cleanUrl, url)
-      await this.serialize()
-
+      this.cache.set(imageUrl, url)
       console.log(`Rehosted image ${imageUrl} to ${url}`)
+
       return url
     } catch (error) {
       console.warn(`Failed to rehost image ${imageUrl}:`, error)
       // Cache the original URL to avoid repeated failures
-      this.cache.set(cleanUrl, imageUrl)
-      await this.serialize()
+      this.cache.set(imageUrl, imageUrl)
       return imageUrl
     }
+  }
+
+  getCachedUrl(originalUrl: string): string | undefined {
+    console.log(Array.from(this.cache.entries()))
+    return this.cache.get(originalUrl)
+  }
+
+  getCacheMap(): Map<string, string> {
+    return new Map(this.cache)
+  }
+  getCacheSize(): number {
+    return this.cache.size
   }
 
   private getFileExtensionFromMimeType(contentType: string): string {
@@ -188,13 +186,10 @@ export class ImageCache {
 
     return ''
   }
+}
 
-  getCachedUrl(originalUrl: string): string | undefined {
-    const cleanUrl = this.stripQueryParams(originalUrl)
-    return this.cache.get(cleanUrl)
-  }
-
-  getCacheSize(): number {
-    return this.cache.size
-  }
+export async function loadImageCache(): Promise<Map<string, string>> {
+  const cache = new ImageCache()
+  await cache.initialize()
+  return cache.getCacheMap()
 }

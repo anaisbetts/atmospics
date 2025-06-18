@@ -1,9 +1,13 @@
+import { loadImageCache } from '@/lib/image-cache'
 import { loadFullContentManifest } from '@/lib/uploader'
 
 import ImageGrid from '../components/image-grid'
 
 export default async function Home() {
-  const manifest = await loadFullContentManifest()
+  const [manifest, imageCache] = await Promise.all([
+    loadFullContentManifest(),
+    loadImageCache(),
+  ])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -20,7 +24,7 @@ export default async function Home() {
           </h2>
         </div>
 
-        <ImageGrid manifest={manifest} />
+        <ImageGrid manifest={manifest} imageCache={imageCache} />
       </main>
     </div>
   )

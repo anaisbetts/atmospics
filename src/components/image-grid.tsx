@@ -8,13 +8,18 @@ import ImageDialog from './image-dialog'
 
 export interface ImageGridProps {
   manifest: ContentManifest
+  imageCache: Map<string, string>
 }
 
-export default function ImageGrid({ manifest }: ImageGridProps) {
+export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
   const [selectedImage, setSelectedImage] = useState<{
     src: string
     alt: string
   } | null>(null)
+
+  const resolveUrl = (originalUrl: string): string => {
+    return imageCache.get(originalUrl) || originalUrl
+  }
 
   const handleImageClick = (src: string, alt: string) => {
     setSelectedImage({ src, alt })
@@ -37,7 +42,7 @@ export default function ImageGrid({ manifest }: ImageGridProps) {
           {postsWithImages.map((post, index) => (
             <div key={post.id || index} className="relative cursor-pointer">
               <Image
-                src={post.images[0].cdnUrl}
+                src={resolveUrl(post.images[0].cdnUrl)}
                 alt={/*post.firstImage.alt ||*/ ''}
                 width={300}
                 height={410}
@@ -45,7 +50,7 @@ export default function ImageGrid({ manifest }: ImageGridProps) {
                 style={{ width: '300px', height: '410px' }}
                 onClick={() =>
                   handleImageClick(
-                    post.images[0].cdnUrl,
+                    resolveUrl(post.images[0].cdnUrl),
                     /*post.firstImage.alt ||*/ ''
                   )
                 }
