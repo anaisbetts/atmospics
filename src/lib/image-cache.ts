@@ -135,13 +135,13 @@ export class ImageCache {
   }
 
   getCachedUrl(originalUrl: string): string | undefined {
-    console.log(Array.from(this.cache.entries()))
     return this.cache.get(originalUrl)
   }
 
   getCacheMap(): Map<string, string> {
     return new Map(this.cache)
   }
+
   getCacheSize(): number {
     return this.cache.size
   }
