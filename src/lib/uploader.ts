@@ -39,7 +39,7 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
         }
       }
 
-      newManifest = mergeManifests(newManifest, archiveManifest)
+      newManifest = await mergeManifests(newManifest, archiveManifest)
       console.log(
         `Merged archive manifest, now have ${newManifest.posts.length} total posts`
       )
@@ -61,11 +61,11 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
   }
 
   if (latestPosts.posts.length > 0) {
-    newManifest = mergeManifests(newManifest, latestPosts)
+    newManifest = await mergeManifests(newManifest, latestPosts)
   }
 
   // Generate hash for the new manifest
-  newManifest.hash = generateHashForManifest(newManifest)
+  newManifest.hash = await generateHashForManifest(newManifest)
 
   // Compare with existing manifest and only save if different
   if (newManifest.hash !== originalHash) {
@@ -175,7 +175,7 @@ export async function saveContentManifest(
       )
 
       // If the remote manifest is different but has the same content hash, skip upload
-      if (remoteManifest.hash === generateHashForManifest(manifest)) {
+      if (remoteManifest.hash === (await generateHashForManifest(manifest))) {
         console.log(
           'Remote manifest already matches our content, skipping upload'
         )
@@ -199,10 +199,10 @@ export async function saveContentManifest(
   console.log(`Saved content manifest to ${url}`)
 }
 
-function mergeManifests(
+async function mergeManifests(
   manifest: ContentManifest,
   newPosts: ContentManifest
-): ContentManifest {
+): Promise<ContentManifest> {
   const allPosts = [...manifest.posts, ...newPosts.posts]
 
   const uniquePosts = allPosts.reduce((acc, post) => {
@@ -223,7 +223,7 @@ function mergeManifests(
     posts: uniquePosts,
   }
 
-  mergedManifest.hash = generateHashForManifest(mergedManifest)
+  mergedManifest.hash = await generateHashForManifest(mergedManifest)
   return mergedManifest
 }
 

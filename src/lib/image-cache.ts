@@ -1,5 +1,5 @@
-import crypto from 'crypto'
 import { head, put } from '@vercel/blob'
+import { createSHA256Hash, generateUUID } from './hash-utils'
 
 interface ImageCacheData {
   hash: string
@@ -36,7 +36,7 @@ export class ImageCache {
 
   async serialize(): Promise<void> {
     const currentData: ImageCacheData = {
-      hash: this.generateHash(),
+      hash: await this.generateHash(),
       cache: Object.fromEntries(this.cache),
     }
 
@@ -63,7 +63,7 @@ export class ImageCache {
 
           // Regenerate data with merged cache
           currentData.cache = Object.fromEntries(this.cache)
-          currentData.hash = this.generateHash()
+          currentData.hash = await this.generateHash()
         }
       }
     } catch (error) {
@@ -88,10 +88,10 @@ export class ImageCache {
     console.log(`Updated image cache with ${this.cache.size} entries`)
   }
 
-  private generateHash(): string {
+  private async generateHash(): Promise<string> {
     const cacheEntries = Array.from(this.cache.entries()).sort()
     const dataToHash = JSON.stringify(cacheEntries)
-    return crypto.createHash('sha256').update(dataToHash).digest('hex')
+    return createSHA256Hash(dataToHash)
   }
 
   async rehostContent(imageUrl: string): Promise<string> {
@@ -115,7 +115,7 @@ export class ImageCache {
       const blob = await response.blob()
       const contentType = response.headers.get('content-type') || blob.type
       const extension = this.getFileExtensionFromMimeType(contentType)
-      const filename = `${crypto.randomUUID()}${extension ? '.' + extension : ''}`
+      const filename = `${generateUUID()}${extension ? '.' + extension : ''}`
 
       console.log(`Rehosting image ${imageUrl} to ${filename}`)
       const { url } = await put(filename, blob, {
