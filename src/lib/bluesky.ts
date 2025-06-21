@@ -75,7 +75,7 @@ async function fetchCommentsForPost(
             createdAt: record.createdAt || post.indexedAt,
           }
 
-          const comment = generateHashForComment(commentData)
+          const comment = await generateHashForComment(commentData)
           comments.push(comment)
         }
       }
@@ -170,7 +170,7 @@ export class BlueskyFeedBuilder implements FeedBuilder {
             comments,
           }
 
-          return generateHashForPost(postData)
+          return await generateHashForPost(postData)
         })
       )
 
@@ -202,7 +202,7 @@ export class BlueskyFeedBuilder implements FeedBuilder {
       posts: allPosts,
     }
 
-    manifest.hash = generateHashForManifest(manifest)
+    manifest.hash = await generateHashForManifest(manifest)
 
     return manifest
   }
