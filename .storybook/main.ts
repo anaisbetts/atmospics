@@ -19,7 +19,7 @@ const config: StorybookConfig = {
     name: '@storybook/nextjs-vite',
     options: {},
   },
-  staticDirs: ['../public'],
+  staticDirs: ['../public', '../src/stories/assets'],
   viteFinal: async (config) => {
     config.resolve = config.resolve || {}
     config.resolve.alias = {

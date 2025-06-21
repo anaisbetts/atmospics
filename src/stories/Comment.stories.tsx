@@ -29,8 +29,7 @@ export const Default: Story = {
     author: {
       name: 'Sarah Johnson',
       username: 'sarahj',
-      avatar:
-        'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+      avatar: '/profile-1.jpg',
     },
     content:
       'This is a great post! Thanks for sharing your thoughts on this topic. I really appreciate the detailed explanation.',
@@ -70,8 +69,7 @@ export const LongContent: Story = {
     author: {
       name: 'Emma Thompson',
       username: 'emmathompson',
-      avatar:
-        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+      avatar: '/profile-2.jpg',
     },
     content: `This is a much longer comment that spans multiple lines and contains more detailed thoughts and opinions about the topic at hand.
 
@@ -91,8 +89,7 @@ export const Recent: Story = {
     author: {
       name: 'Alex Rivera',
       username: 'alexr',
-      avatar:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+      avatar: '/profile-1.jpg',
     },
     content: 'Just saw this and wanted to jump in with my thoughts!',
     createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
