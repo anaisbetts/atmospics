@@ -176,3 +176,60 @@ export const HighLikes: Story = {
     },
   },
 }
+
+export const MixedMedia: Story = {
+  args: {
+    post: {
+      ...baseSamplePost,
+      id: '6',
+      images: [
+        {
+          type: 'image',
+          cdnUrl: '/src/stories/assets/sample-1.jpg',
+          altText: 'Sample photo',
+          width: 800,
+          height: 600,
+        },
+        {
+          type: 'video',
+          cdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          altText: 'Sample video',
+          width: 1280,
+          height: 720,
+        },
+        {
+          type: 'image',
+          cdnUrl: '/src/stories/assets/sample-2.png',
+          altText: 'Another sample photo',
+          width: 600,
+          height: 800,
+        },
+      ],
+    },
+  },
+}
+
+export const TwoImages: Story = {
+  args: {
+    post: {
+      ...baseSamplePost,
+      id: '7',
+      images: [
+        {
+          type: 'image',
+          cdnUrl: '/src/stories/assets/sample-1.jpg',
+          altText: 'First image',
+          width: 800,
+          height: 600,
+        },
+        {
+          type: 'image',
+          cdnUrl: '/src/stories/assets/sample-2.png',
+          altText: 'Second image',
+          width: 600,
+          height: 800,
+        },
+      ],
+    },
+  },
+}

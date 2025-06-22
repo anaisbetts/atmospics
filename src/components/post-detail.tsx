@@ -1,9 +1,19 @@
 'use client'
 
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import * as React from 'react'
+import { useEffect, useState } from 'react'
+
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from '@/components/ui/carousel'
 import { Post } from '@/lib/types'
+import { cn } from '@/lib/utils'
 import { DateTime } from 'luxon'
 import Comment from './comment'
-import { PostCarousel } from './post-carousel'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 
 interface PostDetailProps {
@@ -12,10 +22,26 @@ interface PostDetailProps {
 }
 
 export default function PostDetail({ post, onLike }: PostDetailProps) {
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+  const [count, setCount] = useState(0)
+
+  const images = post.images
   const timeAgo = DateTime.fromISO(post.createdAt).toRelative() || 'just now'
   const formattedDate = DateTime.fromISO(post.createdAt).toFormat(
     'MMMM d, yyyy'
   )
+
+  useEffect(() => {
+    if (!api) return
+
+    setCount(api.scrollSnapList().length)
+    setCurrent(api.selectedScrollSnap() + 1)
+
+    api.on('select', () => {
+      setCurrent(api.selectedScrollSnap() + 1)
+    })
+  }, [api])
 
   // Convert Post comments to Comment component props
   const comments =
@@ -54,11 +80,91 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
         avatar: undefined,
       }
 
+  if (images.length === 0) return null
+
   return (
     <div className="mx-auto flex max-w-6xl overflow-hidden rounded-lg border border-gray-300 bg-white shadow-lg">
       {/* Left side - Image carousel */}
       <div className="flex-1">
-        <PostCarousel images={post.images} className="aspect-square" />
+        <div
+          className={cn(
+            'group relative aspect-square h-full min-h-[200px] w-full'
+          )}
+        >
+          <Carousel
+            setApi={setApi}
+            className="h-full w-full"
+            opts={{
+              align: 'start',
+              loop: false,
+            }}
+          >
+            <CarouselContent className="h-full">
+              {images.map((image, index) => (
+                <CarouselItem key={index} className="h-full">
+                  <div className="relative flex h-full w-full items-center justify-center bg-black">
+                    {image.type === 'image' ? (
+                      <img
+                        src={image.cdnUrl}
+                        alt={image.altText || `Post image ${index + 1}`}
+                        className="h-full w-full object-contain object-center"
+                      />
+                    ) : (
+                      <video
+                        src={image.cdnUrl}
+                        className="h-full w-full object-contain"
+                        controls
+                        preload="metadata"
+                        aria-label={image.altText || `Post video ${index + 1}`}
+                      />
+                    )}
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+
+            {/* Navigation Arrows - Only show if more than 1 image */}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={() => api?.scrollPrev()}
+                  className="-translate-y-1/2 absolute top-1/2 left-2 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
+                  disabled={current === 1}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                  <span className="sr-only">Previous image</span>
+                </button>
+                <button
+                  onClick={() => api?.scrollNext()}
+                  className="-translate-y-1/2 absolute top-1/2 right-2 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
+                  disabled={current === count}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                  <span className="sr-only">Next image</span>
+                </button>
+              </>
+            )}
+          </Carousel>
+
+          {/* Dots Indicator - Only show if more than 1 image */}
+          {images.length > 1 && (
+            <div className="-translate-x-1/2 absolute bottom-4 left-1/2 z-10 flex space-x-2">
+              {Array.from({ length: count }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => api?.scrollTo(index)}
+                  className={cn(
+                    'h-2 w-2 rounded-full transition-all duration-200',
+                    index + 1 === current
+                      ? 'bg-white'
+                      : 'bg-white/50 hover:bg-white/70'
+                  )}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Right side - Post info and comments */}

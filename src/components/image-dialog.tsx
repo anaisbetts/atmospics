@@ -70,10 +70,7 @@ export default function ImageDialog({
         >
           ×
         </button>
-        <PostCarousel
-          images={post.images}
-          className="h-full max-h-full w-full"
-        />
+        <PostCarousel post={post} className="h-full max-h-full w-full" />
       </div>
     </dialog>
   )
