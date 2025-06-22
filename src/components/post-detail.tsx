@@ -83,12 +83,12 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
   if (images.length === 0) return null
 
   return (
-    <div className="mx-auto flex max-w-6xl overflow-hidden rounded-lg border border-gray-300 bg-white shadow-lg">
-      {/* Left side - Image carousel */}
+    <div className="mx-auto flex max-w-6xl flex-col overflow-hidden rounded-lg border border-gray-300 bg-white shadow-lg md:flex-row">
+      {/* Image carousel */}
       <div className="flex-1">
         <div
           className={cn(
-            'group relative aspect-square h-full min-h-[200px] w-full'
+            'group relative aspect-square min-h-[300px] w-full md:h-full md:min-h-[200px]'
           )}
         >
           <Carousel
@@ -167,8 +167,8 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
         </div>
       </div>
 
-      {/* Right side - Post info and comments */}
-      <div className="flex w-96 flex-col">
+      {/* Post info and comments */}
+      <div className="flex w-full flex-col md:w-96">
         {/* Post header */}
         <div className="flex items-center gap-3 border-gray-200 border-b p-4">
           <Avatar className="h-8 w-8">
@@ -191,7 +191,7 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
         )}
 
         {/* Comments section */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto md:max-h-[400px]">
           <div className="space-y-2 p-4">
             {comments.map((comment) => (
               <Comment key={comment.id} {...comment} />
