@@ -192,7 +192,8 @@ export const MixedMedia: Story = {
         },
         {
           type: 'video',
-          cdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          cdnUrl:
+            'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
           altText: 'Sample video',
           width: 1280,
           height: 720,

@@ -2,19 +2,16 @@
 
 import { useEffect, useRef } from 'react'
 
-import { Post } from '@/lib/types'
-import { PostCarousel } from './post-carousel'
-
 interface ImageDialogProps {
-  post: Post
   isOpen: boolean
   onClose: () => void
+  children: React.ReactNode
 }
 
 export default function ImageDialog({
-  post,
   isOpen,
   onClose,
+  children,
 }: ImageDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
 
@@ -70,7 +67,7 @@ export default function ImageDialog({
         >
           ×
         </button>
-        <PostCarousel post={post} className="h-full max-h-full w-full" />
+        {children}
       </div>
     </dialog>
   )

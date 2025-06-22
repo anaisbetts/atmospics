@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { ContentManifest, Post } from '../lib/types'
 import ImageDialog from './image-dialog'
+import PostDetail from './post-detail'
 
 export interface ImageGridProps {
   manifest: ContentManifest
@@ -56,10 +57,11 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
 
       {selectedImage && (
         <ImageDialog
-          post={selectedImage}
           isOpen={!!selectedImage}
           onClose={() => setSelectedImage(null)}
-        />
+        >
+          <PostDetail post={selectedImage} />
+        </ImageDialog>
       )}
     </>
   )
