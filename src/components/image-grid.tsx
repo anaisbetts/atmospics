@@ -3,8 +3,9 @@
 import Image from 'next/image'
 import { useState } from 'react'
 
-import { ContentManifest } from '../lib/types'
+import { ContentManifest, Post } from '../lib/types'
 import ImageDialog from './image-dialog'
+import PostDetail from './post-detail'
 
 export interface ImageGridProps {
   manifest: ContentManifest
@@ -12,23 +13,11 @@ export interface ImageGridProps {
 }
 
 export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
-  const [selectedImage, setSelectedImage] = useState<{
-    src: string
-    alt: string
-  } | null>(null)
+  const [selectedImage, setSelectedImage] = useState<Post | null>(null)
 
   const resolveUrl = (originalUrl: string): string => {
     return imageCache.get(originalUrl) || originalUrl
   }
-
-  const handleImageClick = (src: string, alt: string) => {
-    setSelectedImage({ src, alt })
-  }
-
-  const handleCloseDialog = () => {
-    setSelectedImage(null)
-  }
-
   const postsWithImages = manifest.posts.filter(
     (post) => post.images.length > 0
   )
@@ -48,12 +37,7 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
                 height={410}
                 className="cursor-pointer object-cover transition-all duration-200 hover:brightness-80"
                 style={{ width: '300px', height: '410px' }}
-                onClick={() =>
-                  handleImageClick(
-                    resolveUrl(post.images[0].cdnUrl),
-                    /*post.firstImage.alt ||*/ ''
-                  )
-                }
+                onClick={() => setSelectedImage(post)}
               />
               {post.images.length > 1 && (
                 <div className="absolute top-2 right-2 h-6 w-6">
@@ -73,11 +57,11 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
 
       {selectedImage && (
         <ImageDialog
-          src={selectedImage.src}
-          alt={selectedImage.alt}
           isOpen={!!selectedImage}
-          onClose={handleCloseDialog}
-        />
+          onClose={() => setSelectedImage(null)}
+        >
+          <PostDetail post={selectedImage} />
+        </ImageDialog>
       )}
     </>
   )

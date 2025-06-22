@@ -83,7 +83,7 @@ export default async function main(args: string[]): Promise<number> {
       posts: validPosts,
     }
 
-    manifest.hash = generateHashForManifest(manifest)
+    manifest.hash = await generateHashForManifest(manifest)
 
     // Upload manifest to Vercel Blob
     console.log('Uploading manifest to Vercel Blob...')
@@ -156,7 +156,7 @@ async function convertInstagramPost(
       comments: undefined,
     }
 
-    return generateHashForPost(postData)
+    return await generateHashForPost(postData)
   } catch (error) {
     console.error('Error converting Instagram post:', error)
     return null

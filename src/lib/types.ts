@@ -1,5 +1,5 @@
-import crypto from 'crypto'
 import { DateTime } from 'luxon'
+import { HashBuilder } from './hash-utils'
 
 export interface ImageContent {
   type: 'video' | 'image'
@@ -40,10 +40,10 @@ export interface FeedBuilder {
   extractPosts(since?: DateTime): Promise<ContentManifest>
 }
 
-export function generateHashForComment(
+export async function generateHashForComment(
   comment: Omit<Comment, 'hash'>
-): Comment {
-  const hash = crypto.createHash('sha256')
+): Promise<Comment> {
+  const hash = new HashBuilder()
   hash.update(comment.username)
   hash.update(comment.text)
   hash.update(comment.profilePicture)
@@ -51,12 +51,14 @@ export function generateHashForComment(
   hash.update(comment.createdAt || '')
   return {
     ...comment,
-    hash: hash.digest('hex'),
+    hash: await hash.digest(),
   }
 }
 
-export function generateHashForPost(post: Omit<Post, 'hash'>): Post {
-  const hash = crypto.createHash('sha256')
+export async function generateHashForPost(
+  post: Omit<Post, 'hash'>
+): Promise<Post> {
+  const hash = new HashBuilder()
   hash.update(post.id)
   hash.update(post.text)
   hash.update(post.createdAt)
@@ -81,17 +83,19 @@ export function generateHashForPost(post: Omit<Post, 'hash'>): Post {
 
   return {
     ...post,
-    hash: hash.digest('hex'),
+    hash: await hash.digest(),
   }
 }
 
-export function generateHashForManifest(manifest: ContentManifest): string {
-  const hash = crypto.createHash('sha256')
+export async function generateHashForManifest(
+  manifest: ContentManifest
+): Promise<string> {
+  const hash = new HashBuilder()
   hash.update(manifest.createdAt)
 
   manifest.posts.forEach((post) => {
     hash.update(post.hash)
   })
 
-  return hash.digest('hex')
+  return hash.digest()
 }

@@ -1,20 +1,17 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect, useRef } from 'react'
 
 interface ImageDialogProps {
-  src: string
-  alt: string
   isOpen: boolean
   onClose: () => void
+  children: React.ReactNode
 }
 
 export default function ImageDialog({
-  src,
-  alt,
   isOpen,
   onClose,
+  children,
 }: ImageDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
 
@@ -70,19 +67,7 @@ export default function ImageDialog({
         >
           ×
         </button>
-        <Image
-          src={src}
-          alt={alt}
-          width={0}
-          height={0}
-          sizes="100vw"
-          className="object-contain"
-          style={{
-            width: 'auto',
-            height: '100%',
-            maxWidth: '100%',
-          }}
-        />
+        {children}
       </div>
     </dialog>
   )
