@@ -27,7 +27,10 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
       {postsWithImages.length === 0 ? (
         <div className="py-8 text-center text-gray-500">No images found</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-1" style={{ gap: '4px' }}>
+        <div
+          className="grid grid-cols-1 gap-1 md:grid-cols-3"
+          style={{ gap: '4px' }}
+        >
           {postsWithImages.map((post, index) => (
             <div key={post.id || index} className="relative cursor-pointer">
               <Image
