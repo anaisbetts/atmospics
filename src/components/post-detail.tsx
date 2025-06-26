@@ -48,9 +48,9 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
     post.comments?.map((comment) => ({
       id: comment.hash,
       author: {
-        name: comment.username,
-        username: comment.username.toLowerCase().replace(/\s+/g, ''),
-        avatar: comment.profilePicture,
+        username: comment.author.username,
+        displayName: comment.author.displayName,
+        avatar: comment.author.avatar,
       },
       content: comment.text,
       createdAt: comment.createdAt || post.createdAt,
@@ -67,16 +67,16 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
       .slice(0, 2)
   }
 
-  // Extract author info from first comment or use placeholder
-  const author = post.comments?.[0]
+  // Use the direct author information from the post
+  const author = post.author
     ? {
-        name: post.comments[0].username,
-        username: post.comments[0].username.toLowerCase().replace(/\s+/g, ''),
-        avatar: post.comments[0].profilePicture,
+        name: post.author.displayName,
+        username: post.author.username.toLowerCase().replace(/\s+/g, ''),
+        avatar: post.author.avatar,
       }
     : {
-        name: 'Anonymous',
-        username: 'anonymous',
+        name: 'Unknown User',
+        username: 'unknown',
         avatar: undefined,
       }
 
@@ -107,15 +107,17 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
                       <img
                         src={image.cdnUrl}
                         alt={image.altText || `Post image ${index + 1}`}
-                        className="h-full w-full object-contain object-center"
+                        className="max-h-full max-w-full object-contain object-center"
+                        style={{ width: 'auto', height: 'auto' }}
                       />
                     ) : (
                       <video
                         src={image.cdnUrl}
-                        className="h-full w-full object-contain"
+                        className="max-h-full max-w-full object-contain"
                         controls
                         preload="metadata"
                         aria-label={image.altText || `Post video ${index + 1}`}
+                        style={{ width: 'auto', height: 'auto' }}
                       />
                     )}
                   </div>
@@ -184,7 +186,7 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
         </div>
 
         {/* Post content */}
-        {post.text && (
+        {post.text && post.text !== 'No text content' && (
           <div className="border-gray-200 border-b p-4">
             <p className="text-sm">{post.text}</p>
           </div>

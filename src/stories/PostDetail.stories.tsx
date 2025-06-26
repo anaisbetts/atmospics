@@ -42,30 +42,42 @@ const baseSamplePost: Post = {
   ],
   comments: [
     {
-      username: 'anizocani',
+      author: {
+        username: 'anizocani',
+        displayName: 'anizocani',
+        avatar: '/profile-1.jpg',
+      },
       text: 'Sometimes dressing up is nice',
-      profilePicture: '/profile-1.jpg',
       createdAt: '2024-12-12T10:30:00Z',
       hash: 'comment-hash-1',
     },
     {
-      username: 'quencodemonkey',
+      author: {
+        username: 'quencodemonkey',
+        displayName: 'quencodemonkey',
+        avatar: '/profile-2.jpg',
+      },
       text: '🔥🔥🔥🔥🔥🔥🔥🔥🤩',
-      profilePicture: '/profile-2.jpg',
       createdAt: '2024-12-12T11:15:00Z',
       hash: 'comment-hash-2',
     },
     {
-      username: 'kcwatkins',
+      author: {
+        username: 'kcwatkins',
+        displayName: 'kcwatkins',
+        avatar: '/profile-1.jpg',
+      },
       text: '🔥🔥🔥🔥🔥🔥',
-      profilePicture: '/profile-1.jpg',
       createdAt: '2024-12-12T11:45:00Z',
       hash: 'comment-hash-3',
     },
     {
-      username: 'aphrobitey',
+      author: {
+        username: 'aphrobitey',
+        displayName: 'aphrobitey',
+        avatar: '/profile-2.jpg',
+      },
       text: '🔥🔥🔥 Looking good!',
-      profilePicture: '/profile-2.jpg',
       createdAt: '2024-12-12T12:00:00Z',
       hash: 'comment-hash-4',
     },
@@ -119,9 +131,12 @@ export const WithLongText: Story = {
       comments: [
         ...baseSamplePost.comments!,
         {
-          username: 'sarah_j',
+          author: {
+            username: 'sarah_j',
+            displayName: 'sarah_j',
+            avatar: '/profile-1.jpg',
+          },
           text: "This sounds like such a perfect day! That café sounds amazing - you'll have to tell me where it is next time we catch up.",
-          profilePicture: '/profile-1.jpg',
           createdAt: '2024-12-12T13:30:00Z',
           hash: 'comment-hash-5',
         },
@@ -138,9 +153,12 @@ export const NoComments: Story = {
       text: 'Just posted this and waiting for the first comment!',
       comments: [
         {
-          username: 'anizocani',
+          author: {
+            username: 'anizocani',
+            displayName: 'anizocani',
+            avatar: '/profile-1.jpg',
+          },
           text: 'Just posted this and waiting for the first comment!',
-          profilePicture: '/profile-1.jpg',
           createdAt: '2024-12-12T10:30:00Z',
           hash: 'comment-hash-author',
         },
@@ -159,16 +177,22 @@ export const HighLikes: Story = {
       comments: [
         ...baseSamplePost.comments!,
         {
-          username: 'alex_photo',
+          author: {
+            username: 'alex_photo',
+            displayName: 'alex_photo',
+            avatar: '/profile-2.jpg',
+          },
           text: 'Absolutely stunning! The lighting in this photo is incredible.',
-          profilePicture: '/profile-2.jpg',
           createdAt: '2024-12-12T14:00:00Z',
           hash: 'comment-hash-6',
         },
         {
-          username: 'emma_styles',
+          author: {
+            username: 'emma_styles',
+            displayName: 'emma_styles',
+            avatar: '/profile-1.jpg',
+          },
           text: "Where did you get that dress? It's gorgeous! 😍",
-          profilePicture: '/profile-1.jpg',
           createdAt: '2024-12-12T14:15:00Z',
           hash: 'comment-hash-7',
         },

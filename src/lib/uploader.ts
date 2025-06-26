@@ -105,12 +105,12 @@ export async function rehostContent(
     // Process profile pictures in comments
     if (post.comments) {
       for (const comment of post.comments) {
-        if (comment.profilePicture) {
+        if (comment.author?.avatar) {
           try {
-            await imageCache.rehostContent(comment.profilePicture)
+            await imageCache.rehostContent(comment.author.avatar)
           } catch (error) {
             console.warn(
-              `Failed to rehost profile picture ${comment.profilePicture}:`,
+              `Failed to rehost profile picture ${comment.author?.avatar}:`,
               error
             )
           }
@@ -263,10 +263,10 @@ export async function cleanupUnusedBlobs(): Promise<void> {
       if (post.comments) {
         for (const comment of post.comments) {
           if (
-            comment.profilePicture &&
-            comment.profilePicture.includes('blob.vercel-storage.com')
+            comment.author?.avatar &&
+            comment.author.avatar.includes('blob.vercel-storage.com')
           ) {
-            const pathname = new URL(comment.profilePicture).pathname
+            const pathname = new URL(comment.author.avatar).pathname
             const filename = pathname.split('/').pop()
             if (filename) {
               usedUrls.add(filename)

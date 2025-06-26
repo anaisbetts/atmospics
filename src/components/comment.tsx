@@ -6,9 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 export interface CommentProps {
   id: string
   author: {
-    name: string
-    avatar?: string
     username: string
+    displayName: string
+    avatar: string
   }
   content: string
   createdAt: string
@@ -39,16 +39,19 @@ export default function Comment({
   return (
     <div className="flex gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
       <Avatar className="h-10 w-10 flex-shrink-0">
-        <AvatarImage src={author.avatar} alt={`${author.name}'s avatar`} />
+        <AvatarImage
+          src={author.avatar}
+          alt={`${author.displayName}'s avatar`}
+        />
         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-medium text-sm text-white">
-          {getInitials(author.name)}
+          {getInitials(author.displayName)}
         </AvatarFallback>
       </Avatar>
 
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
           <h4 className="truncate font-semibold text-gray-900 text-sm">
-            {author.name}
+            {author.displayName}
           </h4>
           <span className="text-gray-500 text-sm">@{author.username}</span>
           <span className="text-gray-400 text-xs">•</span>

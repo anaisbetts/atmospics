@@ -68,9 +68,12 @@ async function fetchCommentsForPost(
           const record = post.record as Record<string, any>
 
           const commentData = {
-            username: post.author.handle,
+            author: {
+              username: post.author.handle,
+              displayName: post.author.displayName || post.author.handle,
+              avatar: post.author.avatar || '',
+            },
             text: record.text || '',
-            profilePicture: post.author.avatar || '',
             originalContentLink: `https://bsky.app/profile/${post.author.handle}/post/${post.uri.split('/').pop()}`,
             createdAt: record.createdAt || post.indexedAt,
           }
@@ -168,6 +171,12 @@ export class BlueskyFeedBuilder implements FeedBuilder {
             originalContentLink,
             likeCount: item.post.likeCount || 0,
             comments,
+            author: {
+              username: item.post.author.handle,
+              displayName:
+                item.post.author.displayName || item.post.author.handle,
+              avatar: item.post.author.avatar || '',
+            },
           }
 
           return await generateHashForPost(postData)

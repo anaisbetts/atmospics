@@ -10,6 +10,12 @@ export interface ImageContent {
   geolocation?: number[] // lat/lng
 }
 
+export interface Author {
+  username: string
+  displayName: string
+  avatar: string
+}
+
 export interface Post {
   id: string
   images: ImageContent[]
@@ -18,13 +24,13 @@ export interface Post {
   originalContentLink?: string
   likeCount?: number
   comments?: Comment[]
+  author?: Author
   hash: string
 }
 
 export interface Comment {
-  username: string
+  author: Author
   text: string
-  profilePicture: string
   originalContentLink?: string
   createdAt?: string
   hash: string
@@ -44,9 +50,10 @@ export async function generateHashForComment(
   comment: Omit<Comment, 'hash'>
 ): Promise<Comment> {
   const hash = new HashBuilder()
-  hash.update(comment.username)
+  hash.update(comment.author.username)
+  hash.update(comment.author.displayName)
+  hash.update(comment.author.avatar)
   hash.update(comment.text)
-  hash.update(comment.profilePicture)
   hash.update(comment.originalContentLink || '')
   hash.update(comment.createdAt || '')
   return {

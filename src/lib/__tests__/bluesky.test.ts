@@ -46,14 +46,13 @@ describe('BlueskyFeedBuilder', () => {
       if (postsWithComments.length > 0) {
         const postWithComments = postsWithComments[0]
         const comment = postWithComments.comments![0]
-        expect(comment).toHaveProperty('username')
-        expect(comment).toHaveProperty('text')
-        expect(comment).toHaveProperty('profilePicture')
-        expect(comment).toHaveProperty('originalContentLink')
-        expect(comment).toHaveProperty('createdAt')
-        expect(typeof comment.username).toBe('string')
-        expect(typeof comment.text).toBe('string')
-        expect(typeof comment.profilePicture).toBe('string')
+        expect(comment).toHaveProperty('author')
+        expect(comment.author).toHaveProperty('username')
+        expect(comment.author).toHaveProperty('displayName')
+        expect(comment.author).toHaveProperty('avatar')
+        expect(typeof comment.author.username).toBe('string')
+        expect(typeof comment.author.displayName).toBe('string')
+        expect(typeof comment.author.avatar).toBe('string')
         expect(typeof comment.originalContentLink).toBe('string')
         expect(typeof comment.createdAt).toBe('string')
         expect(comment.originalContentLink).toMatch(

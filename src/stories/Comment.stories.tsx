@@ -27,8 +27,8 @@ export const Default: Story = {
   args: {
     id: '1',
     author: {
-      name: 'Sarah Johnson',
       username: 'sarahj',
+      displayName: 'Sarah Johnson',
       avatar: '/profile-1.jpg',
     },
     content:
@@ -53,8 +53,9 @@ export const NoAvatar: Story = {
     ...Default.args,
     id: '3',
     author: {
-      name: 'Michael Chen',
       username: 'mchen',
+      displayName: 'Michael Chen',
+      avatar: '',
     },
     content:
       'Great discussion! I have been thinking about this exact issue lately.',
@@ -67,8 +68,8 @@ export const LongContent: Story = {
     ...Default.args,
     id: '4',
     author: {
-      name: 'Emma Thompson',
       username: 'emmathompson',
+      displayName: 'Emma Thompson',
       avatar: '/profile-2.jpg',
     },
     content: `This is a much longer comment that spans multiple lines and contains more detailed thoughts and opinions about the topic at hand.
@@ -87,8 +88,8 @@ export const Recent: Story = {
     ...Default.args,
     id: '5',
     author: {
-      name: 'Alex Rivera',
       username: 'alexr',
+      displayName: 'Alex Rivera',
       avatar: '/profile-1.jpg',
     },
     content: 'Just saw this and wanted to jump in with my thoughts!',
@@ -102,8 +103,9 @@ export const NoLikes: Story = {
     ...Default.args,
     id: '6',
     author: {
-      name: 'Taylor Swift',
       username: 'tswift',
+      displayName: 'Taylor Swift',
+      avatar: '',
     },
     content: 'First comment on this post!',
     createdAt: new Date().toISOString(), // Just now
