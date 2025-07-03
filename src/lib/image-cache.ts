@@ -106,12 +106,6 @@ export class ImageCache {
       return imageUrl
     }
 
-    // Skip if it's a Mux URL (already hosted correctly)
-    if (imageUrl.includes('stream.mux.com')) {
-      this.cache.set(imageUrl, imageUrl)
-      return imageUrl
-    }
-
     try {
       const response = await fetch(imageUrl)
       if (!response.ok) {
