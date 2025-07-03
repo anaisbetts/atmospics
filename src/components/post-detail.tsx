@@ -33,8 +33,7 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
     'MMMM d, yyyy'
   )
 
-  // Helper function to extract Mux playback ID from URL
-  const _getMuxPlaybackId = (cdnUrl: string): string | null => {
+  const getMuxPlaybackId = (cdnUrl: string): string | null => {
     try {
       // Check if it's a Mux streaming URL (e.g., https://stream.mux.com/PLAYBACK_ID.m3u8)
       const muxStreamMatch = cdnUrl.match(/stream\.mux\.com\/([^.]+)\.m3u8/)
@@ -45,6 +44,35 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
     } catch {
       return null
     }
+  }
+
+  const _VideoPlayer = ({ image, index }: { image: any; index: number }) => {
+    const playbackId = getMuxPlaybackId(image.cdnUrl)
+
+    if (playbackId) {
+      return (
+        <MuxPlayer
+          playbackId={playbackId}
+          metadata={{
+            video_title: image.altText || `Post video ${index + 1}`,
+          }}
+          className="max-h-full max-w-full"
+          style={{ width: 'auto', height: 'auto' }}
+          autoPlay={false}
+        />
+      )
+    }
+
+    return (
+      <video
+        src={image.cdnUrl}
+        className="max-h-full max-w-full object-contain"
+        controls
+        preload="metadata"
+        aria-label={image.altText || `Post video ${index + 1}`}
+        style={{ width: 'auto', height: 'auto' }}
+      />
+    )
   }
 
   useEffect(() => {
@@ -126,32 +154,7 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
                         style={{ width: 'auto', height: 'auto' }}
                       />
                     ) : (
-                      (() => {
-                        const playbackId = _getMuxPlaybackId(image.cdnUrl)
-                        return playbackId ? (
-                          <MuxPlayer
-                            playbackId={playbackId}
-                            metadata={{
-                              video_title:
-                                image.altText || `Post video ${index + 1}`,
-                            }}
-                            className="max-h-full max-w-full"
-                            style={{ width: 'auto', height: 'auto' }}
-                            autoPlay={false}
-                          />
-                        ) : (
-                          <video
-                            src={image.cdnUrl}
-                            className="max-h-full max-w-full object-contain"
-                            controls
-                            preload="metadata"
-                            aria-label={
-                              image.altText || `Post video ${index + 1}`
-                            }
-                            style={{ width: 'auto', height: 'auto' }}
-                          />
-                        )
-                      })()
+                      <VideoPlayer image={image} index={index} />
                     )}
                   </div>
                 </CarouselItem>

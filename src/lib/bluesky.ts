@@ -1,5 +1,4 @@
 import AtpAgent from '@atproto/api'
-import Mux from '@mux/mux-node'
 import { DateTime } from 'luxon'
 import { CID } from 'multiformats/cid'
 
@@ -13,6 +12,7 @@ import {
   generateHashForManifest,
   generateHashForPost,
 } from './types'
+import { createMuxClient } from './utils'
 
 async function createAuthenticatedAgent() {
   const bskyUser = process.env.BSKY_USER
@@ -34,22 +34,6 @@ async function createAuthenticatedAgent() {
   })
 
   return agent
-}
-
-async function createMuxClient() {
-  const muxTokenId = process.env.MUX_TOKEN_ID
-  const muxTokenSecret = process.env.MUX_TOKEN_SECRET
-
-  if (!muxTokenId || !muxTokenSecret) {
-    throw new Error(
-      'MUX_TOKEN_ID and MUX_TOKEN_SECRET environment variables are required'
-    )
-  }
-
-  return new Mux({
-    tokenId: muxTokenId,
-    tokenSecret: muxTokenSecret,
-  })
 }
 
 async function uploadVideoToMux(videoUrl: string): Promise<{

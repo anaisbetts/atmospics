@@ -1,7 +1,6 @@
 import crypto from 'crypto'
 import path from 'path'
 import { asyncMap } from '@anaisbetts/commands'
-import Mux from '@mux/mux-node'
 import { put } from '@vercel/blob'
 import fs from 'fs/promises'
 import { DateTime } from 'luxon'
@@ -14,6 +13,7 @@ import {
   generateHashForManifest,
   generateHashForPost,
 } from '../src/lib/types'
+import { createMuxClient } from '../src/lib/utils'
 
 interface InstagramPost {
   media: Array<{
@@ -35,22 +35,6 @@ interface InstagramPost {
       }
     }
   }>
-}
-
-async function createMuxClient() {
-  const muxTokenId = process.env.MUX_TOKEN_ID
-  const muxTokenSecret = process.env.MUX_TOKEN_SECRET
-
-  if (!muxTokenId || !muxTokenSecret) {
-    throw new Error(
-      'MUX_TOKEN_ID and MUX_TOKEN_SECRET environment variables are required'
-    )
-  }
-
-  return new Mux({
-    tokenId: muxTokenId,
-    tokenSecret: muxTokenSecret,
-  })
 }
 
 async function uploadVideoToMux(videoBuffer: Buffer): Promise<{
