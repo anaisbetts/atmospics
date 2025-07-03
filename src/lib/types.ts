@@ -8,7 +8,6 @@ export interface ImageContent {
   width: number
   height: number
   geolocation?: number[] // lat/lng
-  thumbnail?: string // For video content
 }
 
 export interface Author {
@@ -80,9 +79,6 @@ export async function generateHashForPost(
     hash.update(image.height.toString())
     if (image.geolocation) {
       hash.update(image.geolocation.join(','))
-    }
-    if (image.thumbnail) {
-      hash.update(image.thumbnail)
     }
   })
 
