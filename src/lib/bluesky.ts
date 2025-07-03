@@ -153,9 +153,11 @@ async function fetchCommentsForPost(
 
 export class BlueskyFeedBuilder implements FeedBuilder {
   private handle: string
+  private existingManifest?: ContentManifest
 
-  constructor(handle: string) {
+  constructor(handle: string, existingManifest?: ContentManifest) {
     this.handle = handle
+    this.existingManifest = existingManifest
   }
 
   async extractPosts(since?: DateTime): Promise<ContentManifest> {
@@ -223,36 +225,52 @@ export class BlueskyFeedBuilder implements FeedBuilder {
             const cid: CID = record.embed.video.ref
             const videoUrl = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${targetDid}&cid=${cid.toString()}`
 
-            try {
+            // Check if video is already uploaded to Mux by looking for existing posts with this CID
+            const existingPost = this.existingManifest?.posts.find(
+              (p) => p.id === item.post.cid.toString()
+            )
+            const existingVideo = existingPost?.images.find(
+              (img) =>
+                img.type === 'video' && img.cdnUrl.includes('stream.mux.com')
+            )
+
+            if (existingVideo) {
               console.log(
-                `Processing video for post ${item.post.cid.toString()}`
+                `Video for post ${item.post.cid.toString()} already uploaded to Mux, reusing`
               )
-              const muxData = await uploadVideoToMux(videoUrl)
+              images.push(existingVideo)
+            } else {
+              try {
+                console.log(
+                  `Processing video for post ${item.post.cid.toString()}`
+                )
+                const muxData = await uploadVideoToMux(videoUrl)
 
-              // Store Mux playback URL as cdnUrl
-              const playbackUrl = `https://stream.mux.com/${muxData.playbackId}.m3u8`
+                // Store Mux playback URL as cdnUrl
+                const playbackUrl = `https://stream.mux.com/${muxData.playbackId}.m3u8`
 
-              images.push({
-                type: 'video',
-                cdnUrl: playbackUrl,
-                altText: record.embed.alt || '',
-                width: muxData.width,
-                height: muxData.height,
-                thumbnail: muxData.thumbnailUrl,
-              })
-            } catch (error) {
-              console.error(
-                `Failed to process video for post ${item.post.cid.toString()}:`,
-                error
-              )
-              // Fall back to original video URL if Mux processing fails
-              images.push({
-                type: 'video',
-                cdnUrl: videoUrl,
-                altText: record.embed.alt || '',
-                width: record.embed.aspectRatio?.width || 0,
-                height: record.embed.aspectRatio?.height || 0,
-              })
+                images.push({
+                  type: 'video',
+                  cdnUrl: playbackUrl,
+                  altText: record.embed.alt || '',
+                  width: muxData.width,
+                  height: muxData.height,
+                  thumbnail: muxData.thumbnailUrl,
+                })
+              } catch (error) {
+                console.error(
+                  `Failed to process video for post ${item.post.cid.toString()}:`,
+                  error
+                )
+                // Fall back to original video URL if Mux processing fails
+                images.push({
+                  type: 'video',
+                  cdnUrl: videoUrl,
+                  altText: record.embed.alt || '',
+                  width: record.embed.aspectRatio?.width || 0,
+                  height: record.embed.aspectRatio?.height || 0,
+                })
+              }
             }
           }
 

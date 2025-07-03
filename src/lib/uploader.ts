@@ -49,7 +49,10 @@ export async function loadFullContentManifest(): Promise<ContentManifest> {
   }
 
   // Update content from BlueSky
-  const feedBuilder = new BlueskyFeedBuilder(process.env.BSKY_TARGET!)
+  const feedBuilder = new BlueskyFeedBuilder(
+    process.env.BSKY_TARGET!,
+    existingManifest
+  )
   const latestPosts = await feedBuilder.extractPosts()
 
   if (!newManifest) {
