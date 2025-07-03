@@ -33,48 +33,6 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
     'MMMM d, yyyy'
   )
 
-  const getMuxPlaybackId = (cdnUrl: string): string | null => {
-    try {
-      // Check if it's a Mux streaming URL (e.g., https://stream.mux.com/PLAYBACK_ID.m3u8)
-      const muxStreamMatch = cdnUrl.match(/stream\.mux\.com\/([^.]+)\.m3u8/)
-      if (muxStreamMatch) {
-        return muxStreamMatch[1]
-      }
-      return null
-    } catch {
-      return null
-    }
-  }
-
-  const _VideoPlayer = ({ image, index }: { image: any; index: number }) => {
-    const playbackId = getMuxPlaybackId(image.cdnUrl)
-
-    if (playbackId) {
-      return (
-        <MuxPlayer
-          playbackId={playbackId}
-          metadata={{
-            video_title: image.altText || `Post video ${index + 1}`,
-          }}
-          className="max-h-full max-w-full"
-          style={{ width: 'auto', height: 'auto' }}
-          autoPlay={false}
-        />
-      )
-    }
-
-    return (
-      <video
-        src={image.cdnUrl}
-        className="max-h-full max-w-full object-contain"
-        controls
-        preload="metadata"
-        aria-label={image.altText || `Post video ${index + 1}`}
-        style={{ width: 'auto', height: 'auto' }}
-      />
-    )
-  }
-
   useEffect(() => {
     if (!api) return
 
@@ -269,4 +227,46 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
       </div>
     </div>
   )
+}
+
+function VideoPlayer({ image, index }: { image: any; index: number }) {
+  const playbackId = getMuxPlaybackId(image.cdnUrl)
+
+  if (playbackId) {
+    return (
+      <MuxPlayer
+        playbackId={playbackId}
+        metadata={{
+          video_title: image.altText || `Post video ${index + 1}`,
+        }}
+        className="max-h-full max-w-full"
+        style={{ width: 'auto', height: 'auto' }}
+        autoPlay={false}
+      />
+    )
+  }
+
+  return (
+    <video
+      src={image.cdnUrl}
+      className="max-h-full max-w-full object-contain"
+      controls
+      preload="metadata"
+      aria-label={image.altText || `Post video ${index + 1}`}
+      style={{ width: 'auto', height: 'auto' }}
+    />
+  )
+}
+
+function getMuxPlaybackId(cdnUrl: string): string | null {
+  try {
+    // Check if it's a Mux streaming URL (e.g., https://stream.mux.com/PLAYBACK_ID.m3u8)
+    const muxStreamMatch = cdnUrl.match(/stream\.mux\.com\/([^.]+)\.m3u8/)
+    if (muxStreamMatch) {
+      return muxStreamMatch[1]
+    }
+    return null
+  } catch {
+    return null
+  }
 }
