@@ -25,28 +25,41 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
   return (
     <>
       {postsWithImages.length === 0 ? (
-        <div className="py-8 text-center text-gray-500">No images found</div>
+        <div
+          className="py-8 text-center text-gray-500"
+          role="status"
+          aria-live="polite"
+        >
+          No images found
+        </div>
       ) : (
         <div
           className="grid grid-cols-1 gap-1 md:grid-cols-3"
           style={{ gap: '4px' }}
+          role="grid"
+          aria-label="Image gallery"
         >
           {postsWithImages.map((post, index) => (
-            <div key={post.id || index} className="relative cursor-pointer">
-              <Image
-                src={resolveUrl(post.images[0].cdnUrl)}
-                alt={/*post.firstImage.alt ||*/ ''}
-                width={300}
-                height={410}
-                className="cursor-pointer object-cover transition-all duration-200 hover:brightness-80"
-                style={{ width: '300px', height: '410px' }}
+            <div key={post.id || index} className="relative">
+              <button
+                className="relative h-full w-full cursor-pointer rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 onClick={() => setSelectedImage(post)}
-              />
+                aria-label={`View image from post: ${post.text || `Post ${index + 1}`}`}
+              >
+                <Image
+                  src={resolveUrl(post.images[0].cdnUrl)}
+                  alt={post.text || `Post ${index + 1}`}
+                  width={300}
+                  height={410}
+                  className="object-cover transition-all duration-200 hover:brightness-80"
+                  style={{ width: '300px', height: '410px' }}
+                />
+              </button>
               {post.images.length > 1 && (
-                <div className="absolute top-2 right-2 h-6 w-6">
+                <div className="pointer-events-none absolute top-2 right-2 h-6 w-6">
                   <Image
                     src="/carousel.svg"
-                    alt="Carousel icon"
+                    alt={`${post.images.length} images`}
                     width={24}
                     height={24}
                     className="drop-shadow-md"
