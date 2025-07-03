@@ -137,7 +137,6 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
                             }}
                             className="max-h-full max-w-full"
                             style={{ width: 'auto', height: 'auto' }}
-                            controls
                             autoPlay={false}
                           />
                         ) : (

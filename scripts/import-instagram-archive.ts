@@ -71,7 +71,7 @@ async function uploadVideoToMux(videoBuffer: Buffer): Promise<{
   try {
     // Create Mux asset from temp URL
     const asset = await mux.video.assets.create({
-      input: [{ url: tempUrl }],
+      inputs: [{ url: tempUrl }],
       playback_policy: ['public'],
       master_access: 'temporary',
     })
@@ -95,7 +95,9 @@ async function uploadVideoToMux(videoBuffer: Buffer): Promise<{
         }
 
         // Find video track for dimensions
-        const videoTrack = tracks?.find((track) => track.type === 'video')
+        const videoTrack = tracks?.find(
+          (track) => track.type === 'video'
+        ) as any
         const width = videoTrack?.width || 0
         const height = videoTrack?.height || 0
 
