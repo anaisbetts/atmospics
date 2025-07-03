@@ -18,6 +18,14 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
   const resolveUrl = (originalUrl: string): string => {
     return imageCache.get(originalUrl) || originalUrl
   }
+
+  const _getDisplayUrl = (image: any): string => {
+    // For video content, use thumbnail if available, otherwise fall back to cdnUrl
+    if (image.type === 'video' && image.thumbnail) {
+      return resolveUrl(image.thumbnail)
+    }
+    return resolveUrl(image.cdnUrl)
+  }
   const postsWithImages = manifest.posts.filter(
     (post) => post.images.length > 0
   )
@@ -47,7 +55,7 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
                 aria-label={`View image from post: ${post.text || `Post ${index + 1}`}`}
               >
                 <Image
-                  src={resolveUrl(post.images[0].cdnUrl)}
+                  src={_getDisplayUrl(post.images[0])}
                   alt={post.text || `Post ${index + 1}`}
                   width={300}
                   height={410}
@@ -55,6 +63,25 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
                   style={{ width: '300px', height: '410px' }}
                 />
               </button>
+
+              {/* Video indicator */}
+              {post.images[0].type === 'video' && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="rounded-full bg-black bg-opacity-60 p-3">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="text-white"
+                    >
+                      <path d="M8 5v14l11-7z" fill="currentColor" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+
+              {/* Multiple images indicator */}
               {post.images.length > 1 && (
                 <div className="pointer-events-none absolute top-2 right-2 h-6 w-6">
                   <Image
