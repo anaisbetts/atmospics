@@ -12,6 +12,7 @@ import {
   generateHashForManifest,
   generateHashForPost,
 } from './types'
+import { createMuxClient } from './utils'
 
 async function createAuthenticatedAgent() {
   const bskyUser = process.env.BSKY_USER
@@ -33,6 +34,65 @@ async function createAuthenticatedAgent() {
   })
 
   return agent
+}
+
+async function uploadVideoToMux(videoUrl: string): Promise<{
+  playbackId: string
+  width: number
+  height: number
+  thumbnailUrl: string
+}> {
+  const mux = await createMuxClient()
+
+  // Create Mux asset from video URL
+  const asset = await mux.video.assets.create({
+    inputs: [{ url: videoUrl }],
+    playback_policy: ['public'],
+    master_access: 'temporary',
+  })
+
+  // Wait for asset to be ready
+  let assetReady = false
+  let attempts = 0
+  const maxAttempts = 60 // 5 minutes with 5 second intervals
+
+  while (!assetReady && attempts < maxAttempts) {
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+    const updatedAsset = await mux.video.assets.retrieve(asset.id)
+
+    if (updatedAsset.status === 'ready') {
+      assetReady = true
+      const playbackId = updatedAsset.playback_ids?.[0]?.id
+      const tracks = updatedAsset.tracks
+
+      if (!playbackId) {
+        throw new Error('No playback ID found for Mux asset')
+      }
+
+      // Find video track for dimensions
+      const videoTrack = tracks?.find((track) => track.type === 'video') as any
+      const width = videoTrack?.width || 0
+      const height = videoTrack?.height || 0
+
+      // Generate thumbnail URL
+      const thumbnailUrl = `https://image.mux.com/${playbackId}/thumbnail.jpg`
+
+      return {
+        playbackId,
+        width,
+        height,
+        thumbnailUrl,
+      }
+    } else if (updatedAsset.status === 'errored') {
+      throw new Error(
+        `Mux asset processing failed: ${updatedAsset.errors?.messages?.join(', ')}`
+      )
+    }
+
+    attempts++
+  }
+
+  throw new Error('Mux asset processing timed out')
 }
 
 async function fetchCommentsForPost(
@@ -152,6 +212,47 @@ export class BlueskyFeedBuilder implements FeedBuilder {
               } else {
                 console.warn('Image ref is not a link!', img.image)
               }
+            }
+          }
+
+          // Extract video from embed
+          if (
+            record.embed?.$type === 'app.bsky.embed.video' &&
+            record.embed.video?.ref
+          ) {
+            const cid: CID = record.embed.video.ref
+            const videoUrl = `https://bsky.social/xrpc/com.atproto.sync.getBlob?did=${targetDid}&cid=${cid.toString()}`
+
+            try {
+              console.log(
+                `Processing video for post ${item.post.cid.toString()}`
+              )
+              const muxData = await uploadVideoToMux(videoUrl)
+
+              // Store Mux playback URL as cdnUrl
+              const playbackUrl = `https://stream.mux.com/${muxData.playbackId}.m3u8`
+
+              images.push({
+                type: 'video',
+                cdnUrl: playbackUrl,
+                altText: record.embed.alt || '',
+                width: muxData.width,
+                height: muxData.height,
+                thumbnail: muxData.thumbnailUrl,
+              })
+            } catch (error) {
+              console.error(
+                `Failed to process video for post ${item.post.cid.toString()}:`,
+                error
+              )
+              // Fall back to original video URL if Mux processing fails
+              images.push({
+                type: 'video',
+                cdnUrl: videoUrl,
+                altText: record.embed.alt || '',
+                width: record.embed.aspectRatio?.width || 0,
+                height: record.embed.aspectRatio?.height || 0,
+              })
             }
           }
 
