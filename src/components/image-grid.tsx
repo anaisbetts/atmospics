@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { ContentManifest, Post } from '../lib/types'
 import ImageDialog from './image-dialog'
@@ -14,6 +14,56 @@ export interface ImageGridProps {
 
 export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
   const [selectedImage, setSelectedImage] = useState<Post | null>(null)
+  const [_currentHash, setCurrentHash] = useState('')
+
+  // Memoize posts lookup to avoid recreating on every render
+  const postsById = useMemo(() => {
+    const map = new Map<string, Post>()
+    manifest.posts.forEach((post) => map.set(post.id, post))
+    return map
+  }, [manifest.posts])
+
+  // Listen for hash changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1) // Remove #
+      setCurrentHash(hash)
+
+      if (hash.startsWith('post-')) {
+        const postId = hash.replace('post-', '')
+        const post = postsById.get(postId)
+        setSelectedImage(post || null)
+      } else {
+        setSelectedImage(null)
+      }
+    }
+
+    // Set initial hash
+    handleHashChange()
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange)
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+    }
+  }, [postsById])
+
+  const handleImageClick = (post: Post) => {
+    if (post.id) {
+      // Set state immediately for responsive UI
+      setSelectedImage(post)
+      // Then update hash
+      window.location.hash = `post-${post.id}`
+    }
+  }
+
+  const handleClose = () => {
+    // Clear state immediately
+    setSelectedImage(null)
+    // Clear hash
+    window.location.hash = ''
+  }
 
   const resolveUrl = (originalUrl: string): string => {
     return imageCache.get(originalUrl) || originalUrl
@@ -51,7 +101,7 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
             <div key={post.id || index} className="relative">
               <button
                 className="relative h-full w-full cursor-pointer rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                onClick={() => setSelectedImage(post)}
+                onClick={() => handleImageClick(post)}
                 aria-label={`View image from post: ${post.text || `Post ${index + 1}`}`}
               >
                 <Image
@@ -99,10 +149,7 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
       )}
 
       {selectedImage && (
-        <ImageDialog
-          isOpen={!!selectedImage}
-          onClose={() => setSelectedImage(null)}
-        >
+        <ImageDialog isOpen={!!selectedImage} onClose={handleClose}>
           <PostDetail post={selectedImage} />
         </ImageDialog>
       )}
