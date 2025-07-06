@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Atmospics
 
-## Getting Started
+A Next.js application that extracts, caches, and displays content from Bluesky with image rehosting and archival capabilities. The goal is to provide a viable alternative to Instagram that people can actually use for sharing and viewing photos and content.
 
-First, run the development server:
+For most people who don't get much traffic, you can most likely run this on Vercel's free tier without any costs at all, and if you do get traffic, the app is designed to try to save $$ as much as possible
+
+## Setup
+
+1. **Vercel Integrations**: Set up both Vercel Blob Storage and Mux integration in your Vercel dashboard
+   - Mux provides $20/month in free credits when set up via Vercel billing integration, which covers basic usage
+2. **Environment Variables**: Pull environment variables from Vercel:
+
+   ```bash
+   vercel env pull
+   ```
+
+3. **Required Environment Variables**:
+   - `BSKY_USER` and `BSKY_PASS`: Bluesky authentication credentials
+   - `BSKY_TARGET`: Target Bluesky handle to extract content from
+
+## Development
+
+Start the development server with Turbopack:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Other Commands
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Build**: `bun next-build` (includes TypeScript type checking)
+- **Format & Lint**: `bun f` (auto-formats and fixes linting issues)
+- **Test**: `bun run test` (auto-formats and fixes linting issues)
+- **Storybook**: `bun storybook` (component documentation and development)
+- **Code validity check**: `bun f && bun next-build`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Instagram Importer
 
-## Learn More
+To import Instagram content, use:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+bun run scripts/import-instagram-archive.ts ./path/to/instagram/archive
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The application uses a content manifest system that aggregates social media posts with metadata, images, and comments. Content flows through extraction, image caching, content management, and display stages, with SHA-256 hashing for efficient change detection and merging.
