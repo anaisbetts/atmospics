@@ -26,6 +26,7 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
+  const [shareClicked, setShareClicked] = useState(false)
 
   const images = post.images
   const timeAgo = DateTime.fromISO(post.createdAt).toRelative() || 'just now'
@@ -220,6 +221,36 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
               <span className="font-semibold text-sm">
                 {post.likeCount || 0} likes
               </span>
+
+              {/* Share button */}
+              <button
+                onClick={async () => {
+                  const shareUrl = `${window.location.origin}/post/${post.id}`
+                  await navigator.clipboard.writeText(shareUrl)
+                  setShareClicked(true)
+                  setTimeout(() => setShareClicked(false), 2000)
+                }}
+                className={`ml-2 flex items-center gap-1 transition-colors ${
+                  shareClicked
+                    ? 'text-green-500'
+                    : 'text-gray-600 hover:text-blue-500'
+                }`}
+                title={shareClicked ? 'Copied!' : 'Copy share link'}
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                  />
+                </svg>
+              </button>
             </div>
             <time className="text-gray-500 text-xs">{formattedDate}</time>
           </div>
