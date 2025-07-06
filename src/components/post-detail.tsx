@@ -26,6 +26,7 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
+  const [shareClicked, setShareClicked] = useState(false)
 
   const images = post.images
   const timeAgo = DateTime.fromISO(post.createdAt).toRelative() || 'just now'
@@ -223,12 +224,18 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
 
               {/* Share button */}
               <button
-                onClick={() => {
+                onClick={async () => {
                   const shareUrl = `${window.location.origin}/post/${post.id}`
-                  navigator.clipboard.writeText(shareUrl)
+                  await navigator.clipboard.writeText(shareUrl)
+                  setShareClicked(true)
+                  setTimeout(() => setShareClicked(false), 2000)
                 }}
-                className="ml-2 flex items-center gap-1 text-gray-600 transition-colors hover:text-blue-500"
-                title="Copy share link"
+                className={`ml-2 flex items-center gap-1 transition-colors ${
+                  shareClicked
+                    ? 'text-green-500'
+                    : 'text-gray-600 hover:text-blue-500'
+                }`}
+                title={shareClicked ? 'Copied!' : 'Copy share link'}
               >
                 <svg
                   className="h-5 w-5"
