@@ -4,14 +4,15 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 interface PostPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export async function generateMetadata({
   params,
 }: PostPageProps): Promise<Metadata> {
+  const { id } = await params
   const manifest = await loadFullContentManifest()
-  const post = manifest.posts.find((p) => p.id === params.id)
+  const post = manifest.posts.find((p) => p.id === id)
 
   if (!post) {
     return {
@@ -59,6 +60,7 @@ export async function generateMetadata({
 }
 
 export default async function PostPage({ params }: PostPageProps) {
+  const { id } = await params
   // Redirect to home with hash for client-side modal
-  redirect(`/#post-${params.id}`)
+  redirect(`/#post-${id}`)
 }
