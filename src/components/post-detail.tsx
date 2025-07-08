@@ -85,17 +85,13 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
   if (images.length === 0) return null
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col overflow-hidden rounded-lg border border-gray-300 bg-white shadow-lg md:flex-row">
+    <div className="mx-auto flex max-w-6xl flex-col overflow-hidden rounded-lg border border-gray-300 bg-white shadow-lg md:h-[80vh] md:flex-row">
       {/* Image carousel */}
-      <div className="flex-1">
-        <div
-          className={cn(
-            'group relative aspect-square min-h-[300px] w-full md:h-full md:min-h-[200px]'
-          )}
-        >
+      <div className="flex flex-1 items-center justify-center bg-white">
+        <div className={cn('group relative max-h-full max-w-full')}>
           <Carousel
             setApi={setApi}
-            className="h-full w-full"
+            className="h-full max-h-full w-full max-w-full"
             opts={{
               align: 'start',
               loop: false,
@@ -103,8 +99,11 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
           >
             <CarouselContent className="h-full">
               {images.map((image, index) => (
-                <CarouselItem key={index} className="h-full">
-                  <div className="relative flex h-full w-full items-center justify-center bg-black">
+                <CarouselItem
+                  key={index}
+                  className="flex h-full items-center justify-center"
+                >
+                  <div className="relative flex h-full w-full items-center justify-center">
                     {image.type === 'image' ? (
                       <img
                         src={image.cdnUrl}
@@ -270,7 +269,7 @@ function VideoPlayer({ image, index }: { image: any; index: number }) {
         metadata={{
           video_title: image.altText || `Post video ${index + 1}`,
         }}
-        className="max-h-full max-w-full"
+        className="max-h-full max-w-full object-contain"
         style={{ width: 'auto', height: 'auto' }}
         autoPlay={false}
       />
