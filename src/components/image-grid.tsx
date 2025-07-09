@@ -53,6 +53,7 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
     if (post.id) {
       // Set state immediately for responsive UI
       setSelectedImage(post)
+
       // Then update hash
       window.location.hash = `post-${post.id}`
     }
@@ -61,8 +62,11 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
   const handleClose = () => {
     // Clear state immediately
     setSelectedImage(null)
-    // Clear hash
+    // Clear hash without triggering scroll
+    const currentScrollY = window.scrollY
     window.location.hash = ''
+    // Immediately restore scroll position to prevent jump
+    window.scrollTo(0, currentScrollY)
   }
 
   const resolveUrl = (originalUrl: string): string => {
