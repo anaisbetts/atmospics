@@ -36,7 +36,14 @@ export function ThemeProvider({
   disableTransitionOnChange = false,
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme)
+  const [theme, setTheme] = useState<Theme>(() => {
+    // On client side, get the initial theme from localStorage
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem(storageKey) as Theme | null
+      return savedTheme || defaultTheme
+    }
+    return defaultTheme
+  })
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -71,13 +78,6 @@ export function ThemeProvider({
   }
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem(storageKey) as Theme | null
-    if (savedTheme) {
-      setTheme(savedTheme)
-    } else if (enableSystem) {
-      setTheme('system')
-    }
-
     // Set up listener for system preference changes
     if (enableSystem) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -91,7 +91,7 @@ export function ThemeProvider({
       mediaQuery.addEventListener('change', handleChange)
       return () => mediaQuery.removeEventListener('change', handleChange)
     }
-  }, [storageKey, theme, enableSystem])
+  }, [theme, enableSystem])
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
