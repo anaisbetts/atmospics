@@ -4,7 +4,58 @@ import { DateTime } from 'luxon'
 
 import { BlueskyFeedBuilder } from './bluesky'
 import { ImageCache } from './image-cache'
-import { ContentManifest, Post, generateHashForManifest } from './types'
+import {
+  Author,
+  ContentManifest,
+  Post,
+  generateHashForManifest,
+  generateHashForPost,
+} from './types'
+
+// Cache for Bluesky profile avatar to avoid repeated API calls
+let cachedBlueskyAvatar: string | null = null
+
+async function getBlueskyProfileAvatar(): Promise<string> {
+  if (cachedBlueskyAvatar) {
+    return cachedBlueskyAvatar
+  }
+
+  try {
+    const AtpAgent = (await import('@atproto/api')).default
+    const agent = new AtpAgent({
+      service: 'https://bsky.social',
+    })
+
+    const bskyUser = process.env.BSKY_USER
+    const bskyPass = process.env.BSKY_PASS
+
+    if (!bskyUser || !bskyPass) {
+      console.warn(
+        'BSKY_USER and BSKY_PASS not available, using fallback avatar'
+      )
+      return ''
+    }
+
+    await agent.login({
+      identifier: bskyUser,
+      password: bskyPass,
+    })
+
+    const profileResponse = await agent.getProfile({
+      actor: bskyUser,
+    })
+
+    if (profileResponse.success && profileResponse.data.avatar) {
+      cachedBlueskyAvatar = profileResponse.data.avatar
+      return cachedBlueskyAvatar
+    }
+
+    return ''
+  } catch (error) {
+    console.warn('Failed to get Bluesky profile avatar:', error)
+    return ''
+  }
+}
 
 export async function loadFullContentManifest(): Promise<ContentManifest> {
   let existingManifest: ContentManifest | undefined
@@ -142,6 +193,38 @@ export async function fetchContentManifest(): Promise<ContentManifest> {
   return (await response.json()) as ContentManifest
 }
 
+async function normalizeArchivePosts(
+  manifest: ContentManifest
+): Promise<ContentManifest> {
+  const blueskyAvatar = await getBlueskyProfileAvatar()
+
+  const normalizedPosts = await asyncMap(manifest.posts, async (post) => {
+    // If post doesn't have an author, substitute with Instagram import info
+    if (!post.author) {
+      const authorInfo: Author = {
+        username: 'imported-from-instagram',
+        displayName: 'Imported from Instagram',
+        avatar: blueskyAvatar,
+      }
+
+      const postWithAuthor = {
+        ...post,
+        author: authorInfo,
+      }
+
+      // Regenerate hash since we added author info
+      return await generateHashForPost(postWithAuthor)
+    }
+
+    return post
+  })
+
+  return {
+    ...manifest,
+    posts: Array.from(normalizedPosts.values()),
+  }
+}
+
 export async function fetchArchiveManifest(): Promise<ContentManifest | null> {
   try {
     const info = await head('archive-manifest.json')
@@ -156,7 +239,10 @@ export async function fetchArchiveManifest(): Promise<ContentManifest | null> {
       return null
     }
 
-    return (await response.json()) as ContentManifest
+    const rawManifest = (await response.json()) as ContentManifest
+
+    // Normalize posts to ensure they have proper author information
+    return await normalizeArchivePosts(rawManifest)
   } catch (error) {
     console.log('Archive manifest not found or failed to fetch')
     return null

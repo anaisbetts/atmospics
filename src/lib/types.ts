@@ -92,6 +92,12 @@ export async function generateHashForPost(
     })
   }
 
+  if (post.author) {
+    hash.update(post.author.username)
+    hash.update(post.author.displayName)
+    hash.update(post.author.avatar)
+  }
+
   return {
     ...post,
     hash: await hash.digest(),
