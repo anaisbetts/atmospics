@@ -58,6 +58,7 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
       createdAt: comment.createdAt || post.createdAt,
       likes: Math.floor(Math.random() * 10), // Random likes for demo
       isLiked: Math.random() > 0.5, // Random liked state for demo
+      originalContentLink: comment.originalContentLink,
     })) || []
 
   const getInitials = (name: string) => {
@@ -174,8 +175,28 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
             </AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold text-sm">{author.name}</h3>
-            <p className="text-gray-500 text-xs">{timeAgo}</p>
+            <h3 className="font-semibold text-sm">
+              <a
+                href={`https://bsky.app/profile/${author.username}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-blue-600"
+              >
+                {author.name}
+              </a>
+            </h3>
+            {post.originalContentLink ? (
+              <a
+                href={post.originalContentLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-500 text-xs transition-colors hover:text-blue-600"
+              >
+                {timeAgo}
+              </a>
+            ) : (
+              <p className="text-gray-500 text-xs">{timeAgo}</p>
+            )}
           </div>
         </div>
 
@@ -202,24 +223,47 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
               {/* Only show heart button for non-imported posts */}
               {post.author?.username !== 'imported-from-instagram' && (
                 <>
-                  <button
-                    onClick={onLike}
-                    className="flex items-center gap-1 text-gray-600 transition-colors hover:text-red-500"
-                  >
-                    <svg
-                      className="h-6 w-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  {post.originalContentLink ? (
+                    <a
+                      href={post.originalContentLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-gray-600 transition-colors hover:text-red-500"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                      />
-                    </svg>
-                  </button>
+                      <svg
+                        className="h-6 w-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                        />
+                      </svg>
+                    </a>
+                  ) : (
+                    <button
+                      onClick={onLike}
+                      className="flex items-center gap-1 text-gray-600 transition-colors hover:text-red-500"
+                    >
+                      <svg
+                        className="h-6 w-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                        />
+                      </svg>
+                    </button>
+                  )}
                   <span className="font-semibold text-sm">
                     {post.likeCount || 0} likes
                   </span>
