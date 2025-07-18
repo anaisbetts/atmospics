@@ -11,6 +11,7 @@ import {
   generateHashForManifest,
   generateHashForPost,
 } from './types'
+import { fixUnicodeDoubleEncoding } from './utils'
 
 // Cache for Bluesky profile avatar to avoid repeated API calls
 let cachedBlueskyAvatar: string | null = null
@@ -207,8 +208,11 @@ async function normalizeArchivePosts(
         avatar: blueskyAvatar,
       }
 
+      // NB: Instagram double-encodes emoji and sends back garbage data,
+      // fix it for them
       const postWithAuthor = {
         ...post,
+        text: fixUnicodeDoubleEncoding(post.text ?? ''),
         author: authorInfo,
       }
 

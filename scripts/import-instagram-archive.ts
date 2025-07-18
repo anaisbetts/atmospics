@@ -13,7 +13,7 @@ import {
   generateHashForManifest,
   generateHashForPost,
 } from '../src/lib/types'
-import { createMuxClient } from '../src/lib/utils'
+import { createMuxClient, fixUnicodeDoubleEncoding } from '../src/lib/utils'
 
 interface InstagramPost {
   media: Array<{
@@ -198,7 +198,9 @@ async function convertInstagramPost(
     ).toISO()
 
     // Extract text from title
-    const text = firstMedia.title || ''
+    // NB: Instagram double-encodes emoji and sends back garbage data,
+    // fix it for them
+    const text = fixUnicodeDoubleEncoding(firstMedia.title || '')
 
     // Log any non-ASCII characters for debugging
     if (text && /[^\x00-\x7F]/.test(text)) {

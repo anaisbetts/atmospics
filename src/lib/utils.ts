@@ -21,3 +21,22 @@ export async function createMuxClient() {
     tokenSecret: muxTokenSecret,
   })
 }
+
+export function fixUnicodeDoubleEncoding(str: string) {
+  // First, convert the Unicode escape sequences to actual characters
+  const withActualBytes = str.replace(/\\u([0-9a-fA-F]{4})/g, (_match, hex) => {
+    return String.fromCharCode(parseInt(hex, 16))
+  })
+
+  // Now we have the raw UTF-8 bytes as a string
+  // We need to decode this as UTF-8
+  const bytes = []
+  for (let i = 0; i < withActualBytes.length; i++) {
+    bytes.push(withActualBytes.charCodeAt(i))
+  }
+
+  // Create a Uint8Array and decode as UTF-8
+  const uint8Array = new Uint8Array(bytes)
+  const decoder = new TextDecoder('utf-8')
+  return decoder.decode(uint8Array)
+}
