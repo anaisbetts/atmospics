@@ -41,7 +41,3 @@ To import Instagram content, use:
 ```bash
 bun run scripts/import-instagram-archive.ts ./path/to/instagram/archive
 ```
-
-## Architecture
-
-The application uses a content manifest system that aggregates social media posts with metadata, images, and comments. Content flows through extraction, image caching, content management, and display stages, with SHA-256 hashing for efficient change detection and merging.
