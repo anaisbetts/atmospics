@@ -8,6 +8,7 @@ For most people who don't get much traffic, you can most likely run this on Verc
 
 1. **Vercel Integrations**: Set up both Vercel Blob Storage and Mux integration in your Vercel dashboard
    - Mux provides $20/month in free credits when set up via Vercel billing integration, which covers basic usage
+
 2. **Environment Variables**: Pull environment variables from Vercel:
 
    ```bash
