@@ -15,6 +15,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "embla-carousel-react": "^8.6.0",
+        "jstoxml": "^7.0.1",
         "lucide-react": "^0.514.0",
         "luxon": "^3.6.1",
         "multiformats": "^13.3.7",
@@ -41,6 +42,7 @@
         "@trivago/prettier-plugin-sort-imports": "^5.2.2",
         "@types/bun": "^1.2.16",
         "@types/jest": "^29.5.14",
+        "@types/jstoxml": "^5.0.0",
         "@types/luxon": "^3.6.2",
         "@types/node": "^20",
         "@types/react": "^19",
@@ -605,6 +607,8 @@
     "@types/jsdom": ["@types/jsdom@20.0.1", "", { "dependencies": { "@types/node": "*", "@types/tough-cookie": "*", "parse5": "^7.0.0" } }, "sha512-d0r18sZPmMQr1eG35u12FZfhIXNrnsPU/g5wvRKCUf/tOGilKKwYMYGqh33BNR6ba+2gkHw1EUiHoN3mn7E5IQ=="],
 
     "@types/json-schema": ["@types/json-schema@7.0.15", "", {}, "sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA=="],
+
+    "@types/jstoxml": ["@types/jstoxml@5.0.0", "", {}, "sha512-6W1oNiZ/frqtloQdjRm+UtZ0jioU4SMX7iU0OWistGQsr5nrrrhNs82O3Wa8csWKttCBifJTe+CDLFyzNkIOLQ=="],
 
     "@types/luxon": ["@types/luxon@3.6.2", "", {}, "sha512-R/BdP7OxEMc44l2Ex5lSXHoIXTB2JLNa3y2QISIbr58U/YcsffyQrYW//hZSdrfxrjRZj3GcUoxMPGdO8gSYuw=="],
 
@@ -1261,6 +1265,8 @@
     "json5": ["json5@2.2.3", "", { "bin": { "json5": "lib/cli.js" } }, "sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg=="],
 
     "jsonfile": ["jsonfile@6.1.0", "", { "dependencies": { "universalify": "^2.0.0" }, "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ=="],
+
+    "jstoxml": ["jstoxml@7.0.1", "", {}, "sha512-yqCv6FoW1uTqtqO/wqQzvdRhVp+iIFwu153pLdSmJwlRRW3+eRWwfHjCE1E+06hB17s934iFDZI1GW0g4QvA8w=="],
 
     "kleur": ["kleur@3.0.3", "", {}, "sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w=="],
 

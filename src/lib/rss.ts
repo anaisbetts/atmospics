@@ -1,5 +1,7 @@
+import { toXML } from 'jstoxml'
 import { DateTime } from 'luxon'
 import { ContentManifest, Post } from './types'
+import { fixUnicodeDoubleEncoding } from './utils'
 
 export interface RSSConfig {
   title: string
@@ -31,31 +33,44 @@ export function generateRSSFeed(
   const items = manifest.posts
     .slice(0, 50) // Limit to 50 most recent posts
     .map((post) => generateRSSItem(post, config.link))
-    .join('\n')
 
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:media="http://search.yahoo.com/mrss/">
-  <channel>
-    <title>${escapeXML(config.title)}</title>
-    <description>${escapeXML(config.description)}</description>
-    <link>${escapeXML(config.link)}</link>
-    <language>${config.language || 'en-US'}</language>
-    <pubDate>${pubDate}</pubDate>
-    <lastBuildDate>${lastBuildDate}</lastBuildDate>
-    <generator>Atmospics RSS Generator</generator>
-    ${config.copyright ? `<copyright>${escapeXML(config.copyright)}</copyright>` : ''}
-    ${config.managingEditor ? `<managingEditor>${escapeXML(config.managingEditor)}</managingEditor>` : ''}
-    ${config.webMaster ? `<webMaster>${escapeXML(config.webMaster)}</webMaster>` : ''}
-    ${config.image ? generateRSSImage(config.image) : ''}
-    ${items}
-  </channel>
-</rss>`
+  const rssData = {
+    _name: 'rss',
+    _attrs: {
+      version: '2.0',
+      'xmlns:content': 'http://purl.org/rss/1.0/modules/content/',
+      'xmlns:media': 'http://search.yahoo.com/mrss/',
+    },
+    _content: {
+      channel: [
+        { title: config.title },
+        { description: config.description },
+        { link: config.link },
+        { language: config.language || 'en-US' },
+        { pubDate },
+        { lastBuildDate },
+        { generator: 'Atmospics RSS Generator' },
+        ...(config.copyright ? [{ copyright: config.copyright }] : []),
+        ...(config.managingEditor
+          ? [{ managingEditor: config.managingEditor }]
+          : []),
+        ...(config.webMaster ? [{ webMaster: config.webMaster }] : []),
+        ...(config.image ? [generateRSSImage(config.image)] : []),
+        ...items,
+      ],
+    },
+  }
+
+  return toXML(rssData, {
+    header: true,
+    indent: '  ',
+  })
 }
 
-function generateRSSItem(post: Post, baseUrl: string): string {
+function generateRSSItem(post: Post, baseUrl: string): any {
   const pubDate = DateTime.fromISO(post.createdAt).toRFC2822()
   const postUrl = `${baseUrl}/post/${post.id}`
-  const guid = post.id
+  const guid = postUrl
 
   // Generate HTML content with images
   const htmlContent = generateHTMLContent(post)
@@ -63,33 +78,73 @@ function generateRSSItem(post: Post, baseUrl: string): string {
   // Generate media enclosures for images
   const mediaEnclosures = post.images
     .filter((img) => img.type === 'image')
-    .map(
-      (img) =>
-        `<enclosure url="${escapeXML(img.cdnUrl)}" type="image/jpeg" length="0" />`
-    )
-    .join('\n    ')
+    .map((img) => ({
+      _name: 'enclosure',
+      _attrs: {
+        url: img.cdnUrl,
+        type: 'image/jpeg',
+        length: '0',
+      },
+    }))
 
   // Generate media:content elements for better image support
-  const mediaContent = post.images
-    .map((img) => {
-      const mediaType = img.type === 'video' ? 'video' : 'image'
-      return `<media:content url="${escapeXML(img.cdnUrl)}" type="${mediaType}/jpeg" width="${img.width}" height="${img.height}">
-      ${img.altText ? `<media:description>${escapeXML(img.altText)}</media:description>` : ''}
-    </media:content>`
-    })
-    .join('\n    ')
+  const mediaContent = post.images.map((img) => {
+    const mediaType = img.type === 'video' ? 'video' : 'image'
+    const mediaContentItem: any = {
+      _name: 'media:content',
+      _attrs: {
+        url: img.cdnUrl,
+        type: `${mediaType}/jpeg`,
+        width: img.width.toString(),
+        height: img.height.toString(),
+      },
+    }
 
-  return `    <item>
-      <title>${escapeXML(post.text ? truncateText(post.text, 100) : 'Image post')}</title>
-      <link>${escapeXML(postUrl)}</link>
-      <guid isPermaLink="true">${escapeXML(guid)}</guid>
-      <pubDate>${pubDate}</pubDate>
-      <description>${escapeXML(post.text || 'Image post')}</description>
-      <content:encoded><![CDATA[${htmlContent}]]></content:encoded>
-      ${post.author ? `<author>${escapeXML(post.author.username)} (${escapeXML(post.author.displayName)})</author>` : ''}
-      ${mediaEnclosures}
-      ${mediaContent}
-    </item>`
+    if (img.altText) {
+      mediaContentItem._content = {
+        'media:description': fixUnicodeDoubleEncoding(img.altText),
+      }
+    }
+
+    return mediaContentItem
+  })
+
+  const itemData: any = {
+    item: [
+      {
+        title: post.text
+          ? truncateText(fixUnicodeDoubleEncoding(post.text), 100)
+          : 'Image post',
+      },
+      { link: postUrl },
+      {
+        _name: 'guid',
+        _attrs: { isPermaLink: 'true' },
+        _content: guid,
+      },
+      { pubDate },
+      {
+        description: post.text
+          ? fixUnicodeDoubleEncoding(post.text)
+          : 'Image post',
+      },
+      {
+        _name: 'content:encoded',
+        _content: htmlContent,
+      },
+      ...(post.author
+        ? [
+            {
+              author: `noreply@photos.anais.dev (${fixUnicodeDoubleEncoding(post.author.displayName)})`,
+            },
+          ]
+        : []),
+      ...mediaEnclosures,
+      ...mediaContent,
+    ],
+  }
+
+  return itemData
 }
 
 function generateHTMLContent(post: Post): string {
@@ -97,7 +152,7 @@ function generateHTMLContent(post: Post): string {
 
   // Add post text
   if (post.text) {
-    html += `<p>${escapeHTML(post.text)}</p>`
+    html += `<p>${escapeHTML(fixUnicodeDoubleEncoding(post.text))}</p>`
   }
 
   // Add images
@@ -105,11 +160,11 @@ function generateHTMLContent(post: Post): string {
     html += '<div>'
     for (const image of post.images) {
       if (image.type === 'image') {
-        html += `<img src="${escapeHTML(image.cdnUrl)}" alt="${escapeHTML(image.altText)}" width="${image.width}" height="${image.height}" style="max-width: 100%; height: auto; margin: 5px;" />`
+        html += `<img src="${escapeHTML(image.cdnUrl)}" alt="${escapeHTML(fixUnicodeDoubleEncoding(image.altText))}" width="${image.width}" height="${image.height}" style="max-width: 100%; height: auto; margin: 5px;" />`
       } else if (image.type === 'video') {
         html += `<video controls width="${image.width}" height="${image.height}" style="max-width: 100%; height: auto; margin: 5px;">
           <source src="${escapeHTML(image.cdnUrl)}" type="video/mp4">
-          ${image.thumbnail ? `<img src="${escapeHTML(image.thumbnail)}" alt="${escapeHTML(image.altText)}" />` : ''}
+          ${image.thumbnail ? `<img src="${escapeHTML(image.thumbnail)}" alt="${escapeHTML(fixUnicodeDoubleEncoding(image.altText))}" />` : ''}
         </video>`
       }
     }
@@ -118,7 +173,7 @@ function generateHTMLContent(post: Post): string {
 
   // Add author information
   if (post.author) {
-    html += `<p><small>By ${escapeHTML(post.author.displayName)} (@${escapeHTML(post.author.username)})</small></p>`
+    html += `<p><small>By ${escapeHTML(fixUnicodeDoubleEncoding(post.author.displayName))} (@${escapeHTML(fixUnicodeDoubleEncoding(post.author.username))})</small></p>`
   }
 
   // Add link to original content
@@ -129,27 +184,24 @@ function generateHTMLContent(post: Post): string {
   return html
 }
 
-function generateRSSImage(image: RSSConfig['image']): string {
-  if (!image) return ''
+function generateRSSImage(image: RSSConfig['image']): any {
+  if (!image) return null
 
-  return `<image>
-      <url>${escapeXML(image.url)}</url>
-      <title>${escapeXML(image.title)}</title>
-      <link>${escapeXML(image.link)}</link>
-      ${image.width ? `<width>${image.width}</width>` : ''}
-      ${image.height ? `<height>${image.height}</height>` : ''}
-    </image>`
+  const imageData: any = {
+    image: [{ url: image.url }, { title: image.title }, { link: image.link }],
+  }
+
+  if (image.width) {
+    imageData.image.push({ width: image.width.toString() })
+  }
+  if (image.height) {
+    imageData.image.push({ height: image.height.toString() })
+  }
+
+  return imageData
 }
 
-function escapeXML(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-}
-
+// Keep this function only for HTML content within CDATA sections
 function escapeHTML(str: string): string {
   return str
     .replace(/&/g, '&amp;')
