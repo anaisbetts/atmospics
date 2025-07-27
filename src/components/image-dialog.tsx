@@ -54,16 +54,11 @@ export default function ImageDialog({
       }}
     >
       <div
-        className="relative flex items-center justify-center"
-        style={{
-          width: 'calc(100vw - 128px)',
-          height: 'calc(100vh - 128px)',
-          margin: '64px',
-        }}
+        className="relative flex h-full w-full items-center justify-center md:h-[calc(100vh-128px)] md:w-[calc(100vw-128px)] md:m-16"
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75"
+          className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75 md:top-4 md:right-4"
         >
           ×
         </button>
