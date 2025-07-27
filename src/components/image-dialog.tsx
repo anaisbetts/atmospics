@@ -56,7 +56,7 @@ export default function ImageDialog({
       <div className="relative flex h-full w-full items-center justify-center md:m-16 md:h-[calc(100vh-128px)] md:w-[calc(100vw-128px)]">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75 md:top-4 md:right-4"
+          className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75"
         >
           ×
         </button>
