@@ -89,7 +89,9 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
     <div className="mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden bg-white md:h-[80vh] md:flex-row md:rounded-lg md:border md:border-gray-300 md:shadow-lg">
       {/* Image carousel */}
       <div className="flex w-full flex-1 items-center justify-center bg-white">
-        <div className={cn('group relative h-full w-full max-h-full max-w-full')}>
+        <div
+          className={cn('group relative h-full max-h-full w-full max-w-full')}
+        >
           <Carousel
             setApi={setApi}
             className="h-full max-h-full w-full max-w-full"
@@ -109,7 +111,7 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
                       <img
                         src={image.cdnUrl}
                         alt={image.altText || `Post image ${index + 1}`}
-                        className="max-h-full w-full object-contain object-center md:max-w-full md:w-auto"
+                        className="max-h-full w-full object-contain object-center md:w-auto md:max-w-full"
                       />
                     ) : (
                       <VideoPlayer image={image} index={index} />
@@ -317,7 +319,7 @@ function VideoPlayer({ image, index }: { image: any; index: number }) {
         metadata={{
           video_title: image.altText || `Post video ${index + 1}`,
         }}
-        className="max-h-full w-full object-contain md:max-w-full md:w-auto"
+        className="max-h-full w-full object-contain md:w-auto md:max-w-full"
         autoPlay={false}
       />
     )
@@ -326,7 +328,7 @@ function VideoPlayer({ image, index }: { image: any; index: number }) {
   return (
     <video
       src={image.cdnUrl}
-      className="max-h-full w-full object-contain md:max-w-full md:w-auto"
+      className="max-h-full w-full object-contain md:w-auto md:max-w-full"
       controls
       preload="metadata"
       aria-label={image.altText || `Post video ${index + 1}`}
