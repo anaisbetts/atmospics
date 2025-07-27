@@ -53,14 +53,7 @@ export default function ImageDialog({
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
       }}
     >
-      <div
-        className="relative flex items-center justify-center"
-        style={{
-          width: 'calc(100vw - 128px)',
-          height: 'calc(100vh - 128px)',
-          margin: '64px',
-        }}
-      >
+      <div className="relative flex h-full w-full items-center justify-center md:m-16 md:h-[calc(100vh-128px)] md:w-[calc(100vw-128px)]">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-75"
