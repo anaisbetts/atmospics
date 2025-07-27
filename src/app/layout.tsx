@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Atmospics',
-  description: 'Social Media Archive & Display',
+  description: 'Photos and videos',
 }
 
 export default function RootLayout({
@@ -47,6 +47,12 @@ export default function RootLayout({
               })();
             `,
           }}
+        />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Atmospics RSS Feed"
+          href="/api/rss"
         />
       </head>
       <body
