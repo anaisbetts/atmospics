@@ -49,8 +49,7 @@
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/bun": "^1.2.16",
+    "@types/bun": "^1.2.19",
     "@types/jest": "^29.5.14",
     "@types/jstoxml": "^5.0.0",
     "@types/luxon": "^3.6.2",
@@ -69,7 +68,7 @@
     "tailwindcss": "^4.1.10",
     "tailwindcss-animate": "^1.0.7",
     "tw-animate-css": "^1.3.4",
-    "typescript": "^5",
+    "typescript": "^5.4.5",
     "vercel": "^43.0.0",
     "vitest": "^3.2.3"
   },

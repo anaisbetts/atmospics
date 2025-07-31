@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 
 import { ContentManifest, Post } from '../lib/types'
+import { resolveImageUrl } from '../lib/utils'
 import ImageDialog from './image-dialog'
 import PostDetail from './post-detail'
 
@@ -69,16 +70,12 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
     window.scrollTo(0, currentScrollY)
   }
 
-  const resolveUrl = (originalUrl: string): string => {
-    return imageCache.get(originalUrl) || originalUrl
-  }
-
   const _getDisplayUrl = (image: any): string => {
     // For video content, use thumbnail if available, otherwise fall back to cdnUrl
     if (image.type === 'video' && image.thumbnail) {
-      return resolveUrl(image.thumbnail)
+      return resolveImageUrl(image.thumbnail, imageCache)
     }
-    return resolveUrl(image.cdnUrl)
+    return resolveImageUrl(image.cdnUrl, imageCache)
   }
   const postsWithImages = manifest.posts.filter(
     (post) => post.images.length > 0
@@ -154,7 +151,7 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
 
       {selectedImage && (
         <ImageDialog isOpen={!!selectedImage} onClose={handleClose}>
-          <PostDetail post={selectedImage} />
+          <PostDetail post={selectedImage} imageCache={imageCache} />
         </ImageDialog>
       )}
     </>

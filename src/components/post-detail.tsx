@@ -12,17 +12,22 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel'
 import { Post } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { cn, resolveImageUrl } from '@/lib/utils'
 import { DateTime } from 'luxon'
 import Comment from './comment'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 
 interface PostDetailProps {
   post: Post
+  imageCache?: Map<string, string>
   onLike?: () => void
 }
 
-export default function PostDetail({ post, onLike }: PostDetailProps) {
+export default function PostDetail({
+  post,
+  imageCache,
+  onLike,
+}: PostDetailProps) {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
   const [count, setCount] = useState(0)
@@ -109,12 +114,16 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
                   <div className="relative flex h-full w-full items-center justify-center">
                     {image.type === 'image' ? (
                       <img
-                        src={image.cdnUrl}
+                        src={resolveImageUrl(image.cdnUrl, imageCache)}
                         alt={image.altText || `Post image ${index + 1}`}
                         className="max-h-full w-full object-contain object-center md:w-auto md:max-w-full"
                       />
                     ) : (
-                      <VideoPlayer image={image} index={index} />
+                      <VideoPlayer
+                        image={image}
+                        index={index}
+                        imageCache={imageCache}
+                      />
                     )}
                   </div>
                 </CarouselItem>
@@ -309,7 +318,11 @@ export default function PostDetail({ post, onLike }: PostDetailProps) {
   )
 }
 
-function VideoPlayer({ image, index }: { image: any; index: number }) {
+function VideoPlayer({
+  image,
+  index,
+  imageCache,
+}: { image: any; index: number; imageCache?: Map<string, string> }) {
   const playbackId = getMuxPlaybackId(image.cdnUrl)
 
   if (playbackId) {
@@ -327,7 +340,7 @@ function VideoPlayer({ image, index }: { image: any; index: number }) {
 
   return (
     <video
-      src={image.cdnUrl}
+      src={resolveImageUrl(image.cdnUrl, imageCache)}
       className="max-h-full w-full object-contain md:w-auto md:max-w-full"
       controls
       preload="metadata"

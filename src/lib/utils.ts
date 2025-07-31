@@ -22,6 +22,13 @@ export async function createMuxClient() {
   })
 }
 
+export function resolveImageUrl(
+  originalUrl: string,
+  imageCache?: Map<string, string>
+): string {
+  return imageCache?.get(originalUrl) || originalUrl
+}
+
 export function fixUnicodeDoubleEncoding(str: string) {
   // First, convert the Unicode escape sequences to actual characters
   const withActualBytes = str.replace(/\\u([0-9a-fA-F]{4})/g, (_match, hex) => {
