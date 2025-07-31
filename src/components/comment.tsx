@@ -1,6 +1,7 @@
 'use client'
 
 import { DateTime } from 'luxon'
+import { resolveImageUrl } from '../lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 
 export interface CommentProps {
@@ -16,6 +17,7 @@ export interface CommentProps {
   isLiked?: boolean
   onLike?: () => void
   originalContentLink?: string
+  imageCache?: Map<string, string>
 }
 
 export default function Comment({
@@ -26,6 +28,7 @@ export default function Comment({
   isLiked = false,
   onLike,
   originalContentLink,
+  imageCache,
 }: CommentProps) {
   const timeAgo = DateTime.fromISO(createdAt).toRelative() || 'just now'
 
@@ -42,7 +45,7 @@ export default function Comment({
     <div className="flex gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
       <Avatar className="h-10 w-10 flex-shrink-0">
         <AvatarImage
-          src={author.avatar}
+          src={resolveImageUrl(author.avatar, imageCache)}
           alt={`${author.displayName}'s avatar`}
         />
         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-medium text-sm text-white">

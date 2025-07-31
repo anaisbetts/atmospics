@@ -179,7 +179,10 @@ export default function PostDetail({
         {/* Post header */}
         <div className="flex items-center gap-3 border-gray-200 border-b p-4">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={author.avatar} alt={`${author.name}'s avatar`} />
+            <AvatarImage
+              src={resolveImageUrl(author.avatar || '', imageCache)}
+              alt={`${author.name}'s avatar`}
+            />
             <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-medium text-white text-xs">
               {getInitials(author.name)}
             </AvatarFallback>
@@ -221,7 +224,7 @@ export default function PostDetail({
         <div className="flex-1 overflow-y-auto md:max-h-[400px]">
           <div className="space-y-2 p-4">
             {comments.map((comment) => (
-              <Comment key={comment.id} {...comment} />
+              <Comment key={comment.id} {...comment} imageCache={imageCache} />
             ))}
           </div>
         </div>
