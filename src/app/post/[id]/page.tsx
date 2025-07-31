@@ -1,7 +1,7 @@
-import { loadImageCache } from '@/lib/image-cache'
-import { loadFullContentManifest } from '@/lib/uploader'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { loadImageCache } from '@/lib/image-cache'
+import { loadFullContentManifest } from '@/lib/uploader'
 
 interface PostPageProps {
   params: Promise<{ id: string }>

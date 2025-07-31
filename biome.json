@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.1.3/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["dist/**", ".next/**"]
+    "includes": ["**", "!**/dist/**", "!**/.next/**"]
   },
   "formatter": {
     "enabled": true,
@@ -19,11 +19,9 @@
     "lineWidth": 80,
     "attributePosition": "auto",
     "bracketSpacing": true,
-    "ignore": [".next/**"]
+    "includes": ["**", "!**/.next/**"]
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
@@ -32,7 +30,12 @@
         "useSortedClasses": "error"
       }
     },
-    "ignore": ["node_modules/**", "vite.config.ts", ".next/**"]
+    "includes": [
+      "**",
+      "!**/node_modules/**",
+      "!**/vite.config.ts",
+      "!**/.next/**"
+    ]
   },
   "javascript": {
     "formatter": {
@@ -49,7 +52,7 @@
   },
   "overrides": [
     {
-      "include": ["**/*.tsx"],
+      "includes": ["**/*.tsx"],
       "linter": {
         "rules": {
           "correctness": {

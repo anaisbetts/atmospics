@@ -1,17 +1,17 @@
-import crypto from 'crypto'
-import path from 'path'
 import { asyncMap } from '@anaisbetts/commands'
 import { put } from '@vercel/blob'
+import crypto from 'crypto'
 import fs from 'fs/promises'
 import { DateTime } from 'luxon'
+import path from 'path'
 import sharp from 'sharp'
 
 import {
   ContentManifest,
-  ImageContent,
-  Post,
   generateHashForManifest,
   generateHashForPost,
+  ImageContent,
+  Post,
 } from '../src/lib/types'
 import { createMuxClient, fixUnicodeDoubleEncoding } from '../src/lib/utils'
 
@@ -195,7 +195,7 @@ async function convertInstagramPost(
     // Convert creation timestamp to ISO string
     const createdAt = DateTime.fromSeconds(
       firstMedia.creation_timestamp
-    ).toISO()
+    ).toISO()!
 
     // Extract text from title
     // NB: Instagram double-encodes emoji and sends back garbage data,

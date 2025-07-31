@@ -7,9 +7,9 @@ import { ImageCache } from './image-cache'
 import {
   Author,
   ContentManifest,
-  Post,
   generateHashForManifest,
   generateHashForPost,
+  Post,
 } from './types'
 import { fixUnicodeDoubleEncoding } from './utils'
 

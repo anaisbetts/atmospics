@@ -2,9 +2,9 @@
 
 import MuxPlayer from '@mux/mux-player-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { DateTime } from 'luxon'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
-
 import {
   Carousel,
   type CarouselApi,
@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/carousel'
 import { Post } from '@/lib/types'
 import { cn, resolveImageUrl } from '@/lib/utils'
-import { DateTime } from 'luxon'
 import Comment from './comment'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 
@@ -325,7 +324,11 @@ function VideoPlayer({
   image,
   index,
   imageCache,
-}: { image: any; index: number; imageCache?: Map<string, string> }) {
+}: {
+  image: any
+  index: number
+  imageCache?: Map<string, string>
+}) {
   const playbackId = getMuxPlaybackId(image.cdnUrl)
 
   if (playbackId) {
