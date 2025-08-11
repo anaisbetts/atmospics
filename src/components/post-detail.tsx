@@ -3,6 +3,7 @@
 import MuxPlayer from '@mux/mux-player-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { DateTime } from 'luxon'
+import Image from 'next/image'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 import {
@@ -112,11 +113,17 @@ export default function PostDetail({
                 >
                   <div className="relative flex h-full w-full items-center justify-center">
                     {image.type === 'image' ? (
-                      <img
-                        src={resolveImageUrl(image.cdnUrl, imageCache)}
-                        alt={image.altText || `Post image ${index + 1}`}
-                        className="max-h-full w-full object-contain object-center md:w-auto md:max-w-full"
-                      />
+                      <div className="relative h-full w-full">
+                        <Image
+                          src={resolveImageUrl(image.cdnUrl, imageCache)}
+                          alt={image.altText || `Post image ${index + 1}`}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 66vw"
+                          className="object-contain object-center"
+                          loading="lazy"
+                          priority={false}
+                        />
+                      </div>
                     ) : (
                       <VideoPlayer
                         image={image}

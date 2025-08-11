@@ -110,6 +110,8 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
                   alt={post.text || `Post ${index + 1}`}
                   width={300}
                   height={410}
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, 300px"
                   className="object-cover transition-all duration-200 hover:brightness-80"
                   style={{ width: '300px', height: '410px' }}
                 />

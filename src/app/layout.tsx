@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import Script from 'next/script'
 
 import { ThemeProvider } from '@/components/ui/theme-provider'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -29,6 +30,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <Script
+          src="https://polyfill.io/v3/polyfill.min.js?features=IntersectionObserver"
+          strategy="beforeInteractive"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `

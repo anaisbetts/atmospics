@@ -1,6 +1,6 @@
-import AtpAgent from '@atproto/api'
+import type AtpAgent from '@atproto/api'
 import { DateTime } from 'luxon'
-import { CID } from 'multiformats/cid'
+import type { CID } from 'multiformats/cid'
 
 import {
   Comment,
@@ -15,6 +15,7 @@ import {
 import { createMuxClient } from './utils'
 
 async function createAuthenticatedAgent() {
+  const { default: AtpAgent } = await import('@atproto/api')
   const bskyUser = process.env.BSKY_USER
   const bskyPass = process.env.BSKY_PASS
 
