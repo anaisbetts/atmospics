@@ -77,15 +77,50 @@ function Carousel({
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === 'ArrowLeft') {
+      const target = event.target as HTMLElement | null
+      if (
+        target &&
+        (target.closest('input, textarea, select, [contenteditable]') ||
+          target.closest('video, audio'))
+      ) {
+        return
+      }
+
+      const isHorizontal =
+        (orientation ?? (opts?.axis === 'y' ? 'vertical' : 'horizontal')) ===
+        'horizontal'
+
+      if (event.key === 'Home') {
         event.preventDefault()
-        scrollPrev()
-      } else if (event.key === 'ArrowRight') {
+        api?.scrollTo(0)
+        return
+      }
+      if (event.key === 'End') {
         event.preventDefault()
-        scrollNext()
+        const lastIndex = (api?.scrollSnapList().length ?? 1) - 1
+        if (lastIndex >= 0) api?.scrollTo(lastIndex)
+        return
+      }
+
+      if (isHorizontal) {
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault()
+          scrollPrev()
+        } else if (event.key === 'ArrowRight') {
+          event.preventDefault()
+          scrollNext()
+        }
+      } else {
+        if (event.key === 'ArrowUp') {
+          event.preventDefault()
+          scrollPrev()
+        } else if (event.key === 'ArrowDown') {
+          event.preventDefault()
+          scrollNext()
+        }
       }
     },
-    [scrollPrev, scrollNext]
+    [scrollPrev, scrollNext, api, orientation, opts?.axis]
   )
 
   React.useEffect(() => {
