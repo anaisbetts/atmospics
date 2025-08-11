@@ -1,4 +1,5 @@
-import { BlueskyFeedBuilder } from '../bluesky'
+// Intentionally avoid top-level import of BlueskyFeedBuilder so we can
+// skip this test before loading ESM dependencies that may not resolve under Bun.
 
 describe('BlueskyFeedBuilder', () => {
   it('should fetch posts from BSKY_TARGET', async () => {
@@ -13,6 +14,7 @@ describe('BlueskyFeedBuilder', () => {
       return
     }
 
+    const { BlueskyFeedBuilder } = await import('../bluesky')
     const feedBuilder = new BlueskyFeedBuilder(target!)
     const manifest = await feedBuilder.extractPosts()
 
