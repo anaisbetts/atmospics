@@ -100,7 +100,7 @@ export default function PostDetail({
             setApi={setApi}
             className="h-full max-h-full w-full max-w-full"
             opts={{
-              align: 'start',
+              align: 'center',
               loop: false,
             }}
           >
@@ -229,7 +229,7 @@ export default function PostDetail({
         </div>
 
         {/* Bottom section - Like count and date */}
-        <div className="border-gray-200 border-t p-4">
+        <div className="mt-auto border-gray-200 border-t p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {/* Only show heart button for non-imported posts */}

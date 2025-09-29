@@ -101,7 +101,7 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
           {postsWithImages.map((post, index) => (
             <div key={post.id || index} className="relative">
               <button
-                className="relative h-full w-full cursor-pointer rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="relative flex h-full w-full cursor-pointer items-center justify-center rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 onClick={() => handleImageClick(post)}
                 aria-label={`View image from post: ${post.text || `Post ${index + 1}`}`}
               >
