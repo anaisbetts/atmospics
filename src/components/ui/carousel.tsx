@@ -60,6 +60,7 @@ function Carousel({
   )
   const [canScrollPrev, setCanScrollPrev] = React.useState(false)
   const [canScrollNext, setCanScrollNext] = React.useState(false)
+  const carouselContainerRef = React.useRef<HTMLDivElement>(null)
 
   const onSelect = React.useCallback((api: CarouselApi) => {
     if (!api) return
@@ -104,6 +105,11 @@ function Carousel({
     }
   }, [api, onSelect])
 
+  React.useEffect(() => {
+    // Auto-focus the carousel when it mounts so keyboard navigation works immediately
+    carouselContainerRef.current?.focus()
+  }, [])
+
   return (
     <CarouselContext.Provider
       value={{
@@ -119,11 +125,13 @@ function Carousel({
       }}
     >
       <div
+        ref={carouselContainerRef}
         onKeyDownCapture={handleKeyDown}
         className={cn('relative', className)}
         role="region"
         aria-roledescription="carousel"
         data-slot="carousel"
+        tabIndex={0}
         {...props}
       >
         {children}

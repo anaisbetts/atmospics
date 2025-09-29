@@ -132,22 +132,24 @@ export default function PostDetail({
             {/* Navigation Arrows - Only show if more than 1 image */}
             {images.length > 1 && (
               <>
-                <button
-                  onClick={() => api?.scrollPrev()}
-                  className="-translate-y-1/2 absolute top-1/2 left-2 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
-                  disabled={current === 1}
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                  <span className="sr-only">Previous image</span>
-                </button>
-                <button
-                  onClick={() => api?.scrollNext()}
-                  className="-translate-y-1/2 absolute top-1/2 right-2 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
-                  disabled={current === count}
-                >
-                  <ChevronRight className="h-5 w-5" />
-                  <span className="sr-only">Next image</span>
-                </button>
+                {current > 1 && (
+                  <button
+                    onClick={() => api?.scrollPrev()}
+                    className="-translate-y-1/2 absolute top-1/2 left-2 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                    <span className="sr-only">Previous image</span>
+                  </button>
+                )}
+                {current < count && (
+                  <button
+                    onClick={() => api?.scrollNext()}
+                    className="-translate-y-1/2 absolute top-1/2 right-2 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                    <span className="sr-only">Next image</span>
+                  </button>
+                )}
               </>
             )}
           </Carousel>
