@@ -3,8 +3,14 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      new URL('https://*.public.blob.vercel-storage.com/**'),
-      new URL('https://image.mux.com/**'),
+      {
+        protocol: 'https',
+        hostname: '**.public.blob.vercel-storage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'image.mux.com',
+      },
     ],
   },
   // Skip prerendering the page in build to avoid environment variable errors
