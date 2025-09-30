@@ -14,13 +14,27 @@ export default function ImageDialog({
   children,
 }: ImageDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const lastActiveRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
 
     if (isOpen) {
+      lastActiveRef.current = (document.activeElement as HTMLElement) || null
       dialog.showModal()
+      // Move focus into dialog
+      requestAnimationFrame(() => {
+        const auto = dialog.querySelector<HTMLElement>('[autofocus]')
+        if (auto) {
+          auto.focus()
+          return
+        }
+        const focusable = dialog.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        focusable?.focus()
+      })
     } else {
       dialog.close()
     }
@@ -32,6 +46,8 @@ export default function ImageDialog({
 
     const handleClose = () => {
       onClose()
+      // Restore focus to the triggering element
+      lastActiveRef.current?.focus()
     }
 
     dialog.addEventListener('close', handleClose)
@@ -44,10 +60,20 @@ export default function ImageDialog({
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDialogElement>) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation()
+      onClose()
+    }
+  }
+
   return (
     <dialog
       ref={dialogRef}
       onClick={handleBackdropClick}
+      onKeyDown={handleKeyDown}
+      role="dialog"
+      aria-modal="true"
       className="h-screen max-h-none w-screen max-w-none bg-transparent p-0"
       style={{
         backgroundColor: 'rgba(0, 0, 0, 0.8)',

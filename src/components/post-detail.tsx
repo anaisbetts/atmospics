@@ -103,6 +103,9 @@ export default function PostDetail({
               align: 'center',
               loop: false,
             }}
+            tabIndex={0}
+            aria-label="Post media carousel"
+            autoFocus
           >
             <CarouselContent className="h-full">
               {images.map((image, index) => (
