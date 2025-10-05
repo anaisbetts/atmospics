@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { ContentManifest, Post } from '../lib/types'
 import { resolveImageUrl } from '../lib/utils'
@@ -16,6 +16,8 @@ export interface ImageGridProps {
 export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
   const [selectedImage, setSelectedImage] = useState<Post | null>(null)
   const [_currentHash, setCurrentHash] = useState('')
+  const [columns, setColumns] = useState<number>(1)
+  const itemRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   // Memoize posts lookup to avoid recreating on every render
   const postsById = useMemo(() => {
@@ -23,6 +25,14 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
     manifest.posts.forEach((post) => map.set(post.id, post))
     return map
   }, [manifest.posts])
+
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 768px)')
+    const update = () => setColumns(mql.matches ? 3 : 1)
+    update()
+    mql.addEventListener('change', update)
+    return () => mql.removeEventListener('change', update)
+  }, [])
 
   // Listen for hash changes
   useEffect(() => {
@@ -58,6 +68,39 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
       // Then update hash
       window.location.hash = `post-${post.id}`
     }
+  }
+
+  const handleGridKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number,
+    total: number
+  ) => {
+    let nextIndex = -1
+    switch (event.key) {
+      case 'ArrowRight':
+        nextIndex = Math.min(index + 1, total - 1)
+        break
+      case 'ArrowLeft':
+        nextIndex = Math.max(index - 1, 0)
+        break
+      case 'ArrowDown':
+        nextIndex = Math.min(index + columns, total - 1)
+        break
+      case 'ArrowUp':
+        nextIndex = Math.max(index - columns, 0)
+        break
+      case 'Home':
+        nextIndex = 0
+        break
+      case 'End':
+        nextIndex = total - 1
+        break
+      default:
+        return
+    }
+    event.preventDefault()
+    const next = itemRefs.current[nextIndex]
+    next?.focus()
   }
 
   const handleClose = () => {
@@ -99,11 +142,23 @@ export default function ImageGrid({ manifest, imageCache }: ImageGridProps) {
           aria-label="Image gallery"
         >
           {postsWithImages.map((post, index) => (
-            <div key={post.id || index} className="relative">
+            <div
+              key={post.id || index}
+              className="relative"
+              role="gridcell"
+              aria-rowindex={Math.floor(index / columns) + 1}
+              aria-colindex={(index % columns) + 1}
+            >
               <button
                 className="relative flex h-full w-full cursor-pointer items-center justify-center rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 onClick={() => handleImageClick(post)}
                 aria-label={`View image from post: ${post.text || `Post ${index + 1}`}`}
+                ref={(el) => {
+                  itemRefs.current[index] = el
+                }}
+                onKeyDown={(e) =>
+                  handleGridKeyDown(e, index, postsWithImages.length)
+                }
               >
                 <Image
                   src={_getDisplayUrl(post.images[0])}
