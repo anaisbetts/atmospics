@@ -104,9 +104,13 @@
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.78 0.22 295.437); /* Lavender primary sidebar color */
+  --sidebar-primary: oklch(
+    0.78 0.22 295.437
+  ); /* Lavender primary sidebar color */
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.74 0.2 295.437); /* Slightly dimmer lavender for sidebar accent */
+  --sidebar-accent: oklch(
+    0.74 0.2 295.437
+  ); /* Slightly dimmer lavender for sidebar accent */
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
