@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
   // Skip prerendering the page in build to avoid environment variable errors
   // Theme changes don't require environment variables
   skipTrailingSlashRedirect: true,
-  skipMiddlewareUrlNormalize: true,
+  skipProxyUrlNormalize: true,
 }
 
 export default nextConfig

@@ -135,7 +135,7 @@ export default function PostDetail({
                 {current > 1 && (
                   <button
                     onClick={() => api?.scrollPrev()}
-                    className="-translate-y-1/2 absolute top-1/2 left-2 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
+                    className="absolute top-1/2 left-2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
                   >
                     <ChevronLeft className="h-5 w-5" />
                     <span className="sr-only">Previous image</span>
@@ -144,7 +144,7 @@ export default function PostDetail({
                 {current < count && (
                   <button
                     onClick={() => api?.scrollNext()}
-                    className="-translate-y-1/2 absolute top-1/2 right-2 z-10 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
+                    className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity duration-200 hover:bg-black/70 group-hover:opacity-100"
                   >
                     <ChevronRight className="h-5 w-5" />
                     <span className="sr-only">Next image</span>
@@ -156,7 +156,7 @@ export default function PostDetail({
 
           {/* Dots Indicator - Only show if more than 1 image */}
           {images.length > 1 && (
-            <div className="-translate-x-1/2 absolute bottom-4 left-1/2 z-10 flex space-x-2">
+            <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 space-x-2">
               {Array.from({ length: count }).map((_, index) => (
                 <button
                   key={index}
