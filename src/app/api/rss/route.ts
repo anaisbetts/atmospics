@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
+import { loadGallery } from '../../../lib/gallery'
 import { generateRSSFeed } from '../../../lib/rss'
-import { fetchContentManifest } from '../../../lib/uploader'
 
 export async function GET() {
   try {
-    const manifest = await fetchContentManifest()
+    const { manifest } = await loadGallery()
 
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL || 'https://atmospics.vercel.app'
@@ -33,7 +33,8 @@ export async function GET() {
     return new NextResponse(rssXml, {
       headers: {
         'Content-Type': 'application/rss+xml',
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control':
+          'public, max-age=300, s-maxage=300, stale-while-revalidate=3600',
       },
     })
   } catch (error) {

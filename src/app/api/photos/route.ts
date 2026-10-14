@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server'
-import { loadImageCache } from '../../../lib/image-cache'
-import { fetchContentManifest } from '../../../lib/uploader'
+import { loadGallery } from '../../../lib/gallery'
 import { resolveImageUrl } from '../../../lib/utils'
 
 export async function GET() {
   try {
-    const [manifest, imageCache] = await Promise.all([
-      fetchContentManifest(),
-      loadImageCache(),
-    ])
+    const { manifest, imageCache } = await loadGallery()
 
     const photos = manifest.posts
       .filter((post) => post.images.length > 0)
@@ -54,7 +50,8 @@ export async function GET() {
       { photos },
       {
         headers: {
-          'Cache-Control': 'public, max-age=3600',
+          'Cache-Control':
+            'public, max-age=300, s-maxage=300, stale-while-revalidate=3600',
         },
       }
     )

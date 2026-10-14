@@ -1,7 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { loadImageCache } from '@/lib/image-cache'
-import { loadFullContentManifest } from '@/lib/uploader'
+import { loadGallery } from '@/lib/gallery'
 
 interface PostPageProps {
   params: Promise<{ id: string }>
@@ -11,7 +10,7 @@ export async function generateMetadata({
   params,
 }: PostPageProps): Promise<Metadata> {
   const { id } = await params
-  const manifest = await loadFullContentManifest()
+  const { manifest } = await loadGallery()
   const post = manifest.posts.find((p) => p.id === id)
 
   if (!post) {

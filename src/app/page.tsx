@@ -1,27 +1,23 @@
-import { loadImageCache } from '@/lib/image-cache'
+import { isBuildPhase, loadGallery } from '@/lib/gallery'
 import { ContentManifest } from '@/lib/types'
-import { loadFullContentManifest } from '@/lib/uploader'
 
 import ImageGrid from '../components/image-grid'
 
-// Skip static generation during build to avoid environment variable errors
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export default async function Home() {
   let manifest: ContentManifest = { posts: [], createdAt: '', hash: '' }
-  let imageCache = new Map()
+  let imageCache = new Map<string, string>()
 
   try {
-    // Only try to load content if we're not in a build environment
-    if (process.env.NODE_ENV !== 'production' || process.env.VERCEL) {
-      ;[manifest, imageCache] = await Promise.all([
-        loadFullContentManifest(),
-        loadImageCache(),
-      ])
-    }
+    ;({ manifest, imageCache } = await loadGallery())
   } catch (error) {
-    console.error('Failed to load content:', error)
-    // Continue with empty data
+    // At runtime, throwing keeps the last successfully generated page
+    if (!isBuildPhase()) {
+      throw error
+    }
+
+    console.error('Failed to load content during build:', error)
   }
 
   return (
